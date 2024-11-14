@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using System.Numerics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Demo
 {
     public class Texture
     {

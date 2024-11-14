@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Demo
 {
     public class ShaderGL
     {

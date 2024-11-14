@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CpuRenderer3D", "CpuRenderer3D\CpuRenderer3D.csproj", "{22BA7EAC-5930-4D5B-A7FC-9A3E170F6259}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CpuRenderer3D.Demo", "CpuRenderer3D.Demo\CpuRenderer3D.Demo.csproj", "{22BA7EAC-5930-4D5B-A7FC-9A3E170F6259}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CpuRenderer3D", "CpuRenderer3D\CpuRenderer3D.csproj", "{F7BBD596-AF7B-4521-9002-E7166CA7E9EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{22BA7EAC-5930-4D5B-A7FC-9A3E170F6259}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22BA7EAC-5930-4D5B-A7FC-9A3E170F6259}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22BA7EAC-5930-4D5B-A7FC-9A3E170F6259}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7BBD596-AF7B-4521-9002-E7166CA7E9EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7BBD596-AF7B-4521-9002-E7166CA7E9EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7BBD596-AF7B-4521-9002-E7166CA7E9EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7BBD596-AF7B-4521-9002-E7166CA7E9EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

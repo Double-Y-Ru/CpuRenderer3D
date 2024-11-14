@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Numerics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Demo
 {
     public class CpuRendererLegacy
     {
@@ -79,7 +79,7 @@ namespace CpuRenderer3D
                             Console.WriteLine(renderingContext.ClipView);
                             Console.WriteLine();*/
 
-                            DrawTriangle(bytemap, triangleV1S, triangleV2S, triangleV3S, Color.FromArgb(45,45,45));
+                            DrawTriangle(bytemap, triangleV1S, triangleV2S, triangleV3S, Color.FromArgb(45, 45, 45));
 
                             DrawLine(bytemap, triangleV1S - Vector3.UnitZ * 0.0001f, triangleV2S - Vector3.UnitZ * 0.0001f, Color.DarkGray);
                             DrawLine(bytemap, triangleV1S - Vector3.UnitZ * 0.0001f, triangleV3S - Vector3.UnitZ * 0.0001f, Color.DarkGray);
@@ -99,7 +99,7 @@ namespace CpuRenderer3D
         {
             DrawLine(bytemap, new Vector3iif(v0), new Vector3iif(v1), color);
         }
-        
+
         private void DrawLine(Bytemap bytemap, Vector3iif v0, Vector3iif v1, Color color)
         {
             bool steep = false;
@@ -137,7 +137,7 @@ namespace CpuRenderer3D
 
                 if (error2 > dx)
                 {
-                    y += (v1.Y > v0.Y ? 1 : -1);
+                    y += v1.Y > v0.Y ? 1 : -1;
                     error2 -= dx * 2;
                 }
 
@@ -177,7 +177,7 @@ namespace CpuRenderer3D
                 float z = A.Z;
                 for (int x = A.X; x <= B.X; x++)
                 {
-                    DrawPixel(bytemap, new Vector3iif(x, (t0.Y + y), z), color);
+                    DrawPixel(bytemap, new Vector3iif(x, t0.Y + y, z), color);
                     z += dz;
                 }
             }

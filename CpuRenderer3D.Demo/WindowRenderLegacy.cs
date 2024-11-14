@@ -4,7 +4,7 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Numerics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Demo
 {
     public class WindowRenderLegacy : GameWindow
     {

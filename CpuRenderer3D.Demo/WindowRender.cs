@@ -4,12 +4,12 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Numerics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Demo
 {
     public class WindowRender : GameWindow
     {
         private readonly CpuRenderer _renderer;
-        private readonly ShaderProgram _shaderProgram;
+        private readonly IShaderProgram _shaderProgram;
         private readonly RenderingContext _renderingContext;
         private Entity[] _entities;
 
@@ -39,7 +39,7 @@ namespace CpuRenderer3D
         private bool dirty = true;
 
         public WindowRender(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, ShaderGL shaderGl,
-            CpuRenderer renderer, Entity[] entities, ShaderProgram shaderProgram, RenderingContext renderingContext)
+            CpuRenderer renderer, Entity[] entities, IShaderProgram shaderProgram, RenderingContext renderingContext)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _renderer = renderer;

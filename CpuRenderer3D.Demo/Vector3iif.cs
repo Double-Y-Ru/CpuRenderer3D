@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Demo
 {
     internal struct Vector3iif
     {

@@ -2,6 +2,6 @@
 {
     public interface IRenderer
     {
-        void Render(Entity entity, RenderingContext shaderContext, ShaderProgram shaderProgram);
+        void Render(Entity entity, RenderingContext shaderContext, IShaderProgram shaderProgram);
     }
 }

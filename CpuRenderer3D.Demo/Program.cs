@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using OpenTK.Windowing.Desktop;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Demo
 {
     internal class Program
     {
@@ -60,7 +60,7 @@ namespace CpuRenderer3D
                 viewProjection: Matrix4x4.CreatePerspectiveFieldOfView((float)(0.5f * Math.PI), aspect, nearPlane, farPlane),
                 clipView: screenScale);
 
-            ShaderProgram shaderProgram = new ShaderProgram();
+            IShaderProgram shaderProgram = new UnlitShaderProgram();
             CpuRenderer cpuRenderer = new CpuRenderer();
 
             WindowRender windowRender = new WindowRender(GameWindowSettings.Default, settings, shaderGl,

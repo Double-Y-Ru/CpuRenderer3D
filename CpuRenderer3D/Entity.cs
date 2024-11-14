@@ -14,7 +14,7 @@
             MeshRenderer = new MeshRenderer();
         }
 
-        public void Render(RenderingContext renderingContext, ShaderProgram shaderProgram)
+        public void Render(RenderingContext renderingContext, IShaderProgram shaderProgram)
         {
             MeshRenderer.Render(this, renderingContext, shaderProgram);
         }

@@ -18,7 +18,7 @@ namespace CpuRenderer3D
         public Matrix4x4 ModelProjection;// ModelWorld * ModelProjection 
         public Matrix4x4 ModelClip;// ProjectionClip * ClipView
 
-        public RenderingContext(Buffer<Vector4> colorBuffer, Buffer<float> zBuffer, 
+        public RenderingContext(Buffer<Vector4> colorBuffer, Buffer<float> zBuffer,
             Matrix4x4 worldView, Matrix4x4 viewProjection, Matrix4x4 clipView)
         {
             ColorBuffer = colorBuffer;

@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Demo
 {
     public static class ObjParser
     {
@@ -19,12 +19,12 @@ namespace CpuRenderer3D
                 {
                     case 'v':
                         second = separated[i][1];
-                        if (second != ' ') 
+                        if (second != ' ')
                         {
                             separated[i] = "";
                             continue;
                         }
-                        
+
                         vertIndexes.Add(i);
                         separated[i] = separated[i].Substring(2);
                         break;
@@ -36,7 +36,7 @@ namespace CpuRenderer3D
                 }
             }
 
-            Vector3[] vertices= new Vector3[vertIndexes.Count];
+            Vector3[] vertices = new Vector3[vertIndexes.Count];
             int counter = 0;
             float[] vertex = new float[3];
             foreach (int i in vertIndexes)
@@ -52,7 +52,7 @@ namespace CpuRenderer3D
             foreach (int i in edgIndexes)
             {
                 int[] vertexIndices = separated[i].Split(" ").Select(a => int.Parse(a.Substring(0, a.IndexOf('/')))).ToArray();
-                triangles[counter] = new Triangle(vertexIndices[0]-1, vertexIndices[1]-1, vertexIndices[2]-1);
+                triangles[counter] = new Triangle(vertexIndices[0] - 1, vertexIndices[1] - 1, vertexIndices[2] - 1);
                 counter++;
             }
 
