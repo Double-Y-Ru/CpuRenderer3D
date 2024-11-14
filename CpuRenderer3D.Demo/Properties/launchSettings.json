@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "CpuRenderer3D.Demo Propeller": {
+      "commandName": "Project",
+      "commandLineArgs": "Propeller.obj",
+      "workingDirectory": "F:\\CpuRenderer3D\\TestData"
+    },
+    "CpuRenderer3D.Demo Barrel": {
+      "commandName": "Project",
+      "commandLineArgs": "Barrel.obj",
+      "workingDirectory": "F:\\CpuRenderer3D\\TestData"
+    },
+    "CpuRenderer3D.Demo Triangle": {
+      "commandName": "Project",
+      "commandLineArgs": "RightTriangle.obj",
+      "workingDirectory": "F:\\CpuRenderer3D\\TestData"
+    }
+  }
+}

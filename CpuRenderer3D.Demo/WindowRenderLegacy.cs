@@ -9,7 +9,7 @@ namespace CpuRenderer3D.Demo
     public class WindowRenderLegacy : GameWindow
     {
         private readonly CpuRendererLegacy _renderer;
-        private Entity[] _entities;
+        private IReadOnlyList<Entity> _entities;
 
         private readonly float[] _vertices =
         {
@@ -38,7 +38,7 @@ namespace CpuRenderer3D.Demo
         private bool dirty = true;
 
         public WindowRenderLegacy(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
-            CpuRendererLegacy renderer, Entity[] entities, Transform camera)
+            CpuRendererLegacy renderer, IReadOnlyList<Entity> entities, Transform camera)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _renderer = renderer;

@@ -5,7 +5,7 @@ namespace CpuRenderer3D.Demo
 {
     public class CpuRendererLegacy
     {
-        public void Render(Transform camera, Entity[] entities, Bytemap bytemap)
+        public void Render(Transform camera, IReadOnlyList<Entity> entities, Bytemap bytemap)
         {
             bytemap.Clear();
 

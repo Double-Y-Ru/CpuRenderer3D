@@ -11,7 +11,7 @@ namespace CpuRenderer3D.Demo
         private readonly CpuRenderer _renderer;
         private readonly IShaderProgram _shaderProgram;
         private readonly RenderingContext _renderingContext;
-        private Entity[] _entities;
+        private IReadOnlyList<Entity> _entities;
 
         private readonly float[] _vertices =
         {
@@ -39,7 +39,7 @@ namespace CpuRenderer3D.Demo
         private bool dirty = true;
 
         public WindowRender(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
-            CpuRenderer renderer, Entity[] entities, IShaderProgram shaderProgram, RenderingContext renderingContext)
+            CpuRenderer renderer, IReadOnlyList<Entity> entities, IShaderProgram shaderProgram, RenderingContext renderingContext)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _renderer = renderer;
