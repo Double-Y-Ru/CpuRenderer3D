@@ -6,11 +6,9 @@ using System.Numerics;
 
 namespace CpuRenderer3D
 {
-    public class WindowRender : GameWindow
+    public class WindowRenderLegacy : GameWindow
     {
-        private readonly CpuRenderer _renderer;
-        private readonly ShaderProgram _shaderProgram;
-        private readonly RenderingContext _renderingContext;
+        private readonly CpuRendererLegacy _renderer;
         private Entity[] _entities;
 
         private readonly float[] _vertices =
@@ -35,21 +33,21 @@ namespace CpuRenderer3D
         private readonly ShaderGL _shaderGl;
         private Texture _texture;
         private Transform _camera;
+        private Bytemap _bytemap;
 
         private bool dirty = true;
 
-        public WindowRender(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, ShaderGL shaderGl,
-            CpuRenderer renderer,  Entity[] entities, ShaderProgram shaderProgram, RenderingContext renderingContext)
+        public WindowRenderLegacy(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, ShaderGL shaderGl,
+            CpuRendererLegacy renderer,  Entity[] entities, Transform camera)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _renderer = renderer;
-            _shaderProgram = shaderProgram;
-            _renderingContext = renderingContext;
             _entities = entities;
+            _camera = camera;
 
             _shaderGl = shaderGl;
             _texture = new Texture();
-            _camera = new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity);
+            _bytemap = new Bytemap(nativeWindowSettings.ClientSize.X, nativeWindowSettings.ClientSize.Y);
         }
 
         protected override void OnLoad()
@@ -58,7 +56,7 @@ namespace CpuRenderer3D
             
             _shaderGl.Init();
             _texture.Init();
-            _texture.Bind(_renderingContext.ColorBuffer.GetData(), _renderingContext.ColorBuffer.Width, _renderingContext.ColorBuffer.Height);
+            _texture.Bind(_bytemap);
 
             VOB = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VOB);
@@ -98,8 +96,8 @@ namespace CpuRenderer3D
 
             base.OnRenderFrame(e);
 
-            _renderer.Render(_entities, _shaderProgram, _renderingContext);
-            _texture.Replace(_renderingContext.ColorBuffer.GetData(), _renderingContext.ColorBuffer.Width, _renderingContext.ColorBuffer.Height);
+            _renderer.Render(_camera, _entities, _bytemap);
+            _texture.Replace(_bytemap);
             _shaderGl.Use();
 
             GL.BindVertexArray(VAO);
@@ -109,18 +107,6 @@ namespace CpuRenderer3D
             SwapBuffers();
 
             dirty = false;
-        }
-
-        private void Vector4ToByte(Vector4[] vector4Map, byte[] bytemap)
-        {
-            for (int i = 0; i < vector4Map.Length; i++)
-            {
-                // xyzw = rgba
-                bytemap[i * 4] = (byte)(Math.Clamp(vector4Map[i].X, 0f, 1f) * 255);
-                bytemap[i * 4 + 1] = (byte)(Math.Clamp(vector4Map[i].Y, 0f, 1f) * 255);
-                bytemap[i * 4 + 2] = (byte)(Math.Clamp(vector4Map[i].Z, 0f, 1f) * 255);
-                bytemap[i * 4 + 3] = (byte)(Math.Clamp(vector4Map[i].W, 0f, 1f) * 255);
-            }
         }
 
         private void MoveCamera()

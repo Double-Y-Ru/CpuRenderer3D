@@ -9,6 +9,55 @@ namespace CpuRenderer3D
             VertexInput fstV, sndV, trdV;
             FragmentInput fstF, sndF, trdF;
 
+            shaderContext.SetModelWorld(entity.Transform.GetMatrix());
+
+            Mesh mesh = entity.Mesh;
+            Triangle[] triangles = mesh.GetTriangles();
+
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                Triangle triangle = triangles[i];
+
+                fstV = new VertexInput(mesh.GetVertex(triangle.First), new Vector3(), new Vector4(0.2f, 0.2f, 0.2f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                sndV = new VertexInput(mesh.GetVertex(triangle.Second), new Vector3(), new Vector4(0.2f, 0.2f, 0.2f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                trdV = new VertexInput(mesh.GetVertex(triangle.Third), new Vector3(), new Vector4(0.2f, 0.2f, 0.2f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+
+                fstF = shaderProgram.ComputeVertex(fstV, shaderContext);
+                sndF = shaderProgram.ComputeVertex(sndV, shaderContext);
+                trdF = shaderProgram.ComputeVertex(trdV, shaderContext);
+
+                Vector3 triangleNormalP = Vector3.Cross(
+                    fstF.Position - sndF.Position,
+                    fstF.Position - trdF.Position);
+
+                if (Vector3.Dot(triangleNormalP, Vector3.UnitZ) < 0) continue;
+
+                if (-1f < fstF.Position.X && fstF.Position.X < 1f
+                 && -1f < fstF.Position.Y && fstF.Position.Y < 1f
+                 && -1f < fstF.Position.Z && fstF.Position.Z < 1f
+                 && -1f < sndF.Position.X && sndF.Position.X < 1f
+                 && -1f < sndF.Position.Y && sndF.Position.Y < 1f
+                 && -1f < sndF.Position.Z && sndF.Position.Z < 1f
+                 && -1f < trdF.Position.X && trdF.Position.X < 1f
+                 && -1f < trdF.Position.Y && trdF.Position.Y < 1f
+                 && -1f < trdF.Position.Z && trdF.Position.Z < 1f
+                 )
+                {
+                    // новый
+                    fstF.Position = Vector3.Transform(fstF.Position, shaderContext.ClipView);
+                    sndF.Position = Vector3.Transform(sndF.Position, shaderContext.ClipView);
+                    trdF.Position = Vector3.Transform(trdF.Position, shaderContext.ClipView);
+
+                    DrawTriangle(shaderContext, shaderProgram, fstF, sndF, trdF);
+                }
+            }
+        }
+
+        /*public void Render(Entity entity, RenderingContext shaderContext, ShaderProgram shaderProgram)
+        {
+            VertexInput fstV, sndV, trdV;
+            FragmentInput fstF, sndF, trdF;
+
             // новый
             shaderContext.SetModelWorld(entity.Transform.GetMatrix());
 
@@ -47,13 +96,13 @@ namespace CpuRenderer3D
                 trdF = shaderProgram.ComputeVertex(trdV, shaderContext);
 
                 // старый
-                FragmentInput fstF1 = new FragmentInput(fstV.Position, fstV.Normal, fstV.Color, fstV.UV0, fstV.UV1, fstV.UV2, fstV.UV3);
-                FragmentInput sndF1 = new FragmentInput(sndV.Position, fstV.Normal, fstV.Color, fstV.UV0, fstV.UV1, fstV.UV2, fstV.UV3);
-                FragmentInput trdF1 = new FragmentInput(trdV.Position, fstV.Normal, fstV.Color, fstV.UV0, fstV.UV1, fstV.UV2, fstV.UV3);
+                FragmentInput fstF1 = new FragmentInput(mesh.GetVertex(triangle.First), fstV.Normal, fstV.Color, fstV.UV0, fstV.UV1, fstV.UV2, fstV.UV3);
+                FragmentInput sndF1 = new FragmentInput(mesh.GetVertex(triangle.Second), fstV.Normal, fstV.Color, fstV.UV0, fstV.UV1, fstV.UV2, fstV.UV3);
+                FragmentInput trdF1 = new FragmentInput(mesh.GetVertex(triangle.Third), fstV.Normal, fstV.Color, fstV.UV0, fstV.UV1, fstV.UV2, fstV.UV3);
 
-                fstF.Position = Vector4.Transform(new Vector4(fstF.Position, 1f), relativeTransform).XYZDivW();
-                sndF.Position = Vector4.Transform(new Vector4(sndF.Position, 1f), relativeTransform).XYZDivW();
-                trdF.Position = Vector4.Transform(new Vector4(trdF.Position, 1f), relativeTransform).XYZDivW();
+                fstF1.Position = Vector4.Transform(new Vector4(fstF1.Position, 1f), relativeTransform).XYZDivW();
+                sndF1.Position = Vector4.Transform(new Vector4(sndF1.Position, 1f), relativeTransform).XYZDivW();
+                trdF1.Position = Vector4.Transform(new Vector4(trdF1.Position, 1f), relativeTransform).XYZDivW();
 
                 Vector3 triangleNormalP = Vector3.Cross(
                     fstF.Position - sndF.Position,
@@ -78,31 +127,15 @@ namespace CpuRenderer3D
                     trdF.Position = Vector3.Transform(trdF.Position, shaderContext.ClipView);
 
                     // старый
-                    fstF.Position = Vector3.Transform(fstF1.Position, screenScale);
-                    sndF.Position = Vector3.Transform(sndF1.Position, screenScale);
-                    trdF.Position = Vector3.Transform(trdF1.Position, screenScale);
-
-                    Console.WriteLine("old");
-                    Console.WriteLine("new");
-                    Console.WriteLine(invertCamera);
-                    Console.WriteLine(shaderContext.WorldView);
-                    Console.WriteLine(proj);
-                    Console.WriteLine(shaderContext.ViewProjection);
-                    Console.WriteLine(projMview);
-                    Console.WriteLine(shaderContext.WorldProjection);
-                    Console.WriteLine(relativeTransform);
-                    Console.WriteLine(shaderContext.ModelProjection);
-                    Console.WriteLine(screenScale);
-                    Console.WriteLine(shaderContext.ClipView);
-                    Console.WriteLine();
+                    fstF1.Position = Vector3.Transform(fstF1.Position, screenScale);
+                    sndF1.Position = Vector3.Transform(sndF1.Position, screenScale);
+                    trdF1.Position = Vector3.Transform(trdF1.Position, screenScale);
 
                     DrawTriangle(shaderContext, shaderProgram, fstF, sndF, trdF);
-                    //DrawTriangle(shaderContext, fstF.Position, sndF.Position, trdF.Position);
-
-                    Console.WriteLine();
+                    DrawTriangle(shaderContext, shaderProgram, fstF1, sndF1, trdF1);
                 }
             }
-        }
+        }*/
 
         private void DrawTriangle(RenderingContext shaderContext, ShaderProgram shaderProgram,
             FragmentInput f0, FragmentInput f1, FragmentInput f2)

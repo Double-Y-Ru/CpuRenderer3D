@@ -1,4 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL4;
+using System.Numerics;
 
 namespace CpuRenderer3D
 {
@@ -27,10 +28,29 @@ namespace CpuRenderer3D
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
 
+        public void Bind(Vector4[] colors, int width, int height)
+        {
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
+                width, height, 0, PixelFormat.Rgba, PixelType.Float, colors);
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        }
+
         public void Replace(byte[] bytemap, int width, int height)
         {
             GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, width, height, PixelFormat.Rgba,
                 PixelType.UnsignedByte, bytemap);
+        }
+
+        public void Replace(float[] floatmap, int width, int height)
+        {
+            GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, width, height, PixelFormat.Rgba,
+                PixelType.Float, floatmap);
+        }
+
+        public void Replace(Vector4[] colors, int width, int height)
+        {
+            GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, width, height, PixelFormat.Rgba,
+                PixelType.Float, colors);
         }
 
         public void Bind(Bytemap bytemap)

@@ -24,12 +24,12 @@ namespace CpuRenderer3D
 
             Mesh mesh = new Mesh(vertices, triangleIndexes);
 
-            Entity[] entities = new Entity[2];
+            /*Entity[] entities = new Entity[2];
             entities[0] = new Entity(new Transform(new Vector3(5f, 0f, 0f), Quaternion.Identity), tooth13);
-            entities[1] = new Entity(new Transform(new Vector3(-5f, 0f, 0f), Quaternion.Identity), tooth14);
+            entities[1] = new Entity(new Transform(new Vector3(-5f, 0f, 0f), Quaternion.Identity), tooth14);*/
 
-            /*Entity[] entities = new Entity[1];
-            entities[0] = new Entity(new Transform(), mesh);*/
+            Entity[] entities = new Entity[1];
+            entities[0] = new Entity(new Transform(), mesh);
 
             ShaderGL shaderGl = new ShaderGL(
                 File.ReadAllText(@"C:\Project\CpuRenderer3D\shader1.vert"),
@@ -63,9 +63,14 @@ namespace CpuRenderer3D
             ShaderProgram shaderProgram = new ShaderProgram();
             CpuRenderer cpuRenderer = new CpuRenderer();
 
-            WindowRender program = new WindowRender(GameWindowSettings.Default, settings, shaderGl,
+            WindowRender windowRender = new WindowRender(GameWindowSettings.Default, settings, shaderGl,
                 cpuRenderer, entities, shaderProgram, renderingContext);
-            program.Run();
+            windowRender.Run();
+
+            CpuRendererLegacy cpuRendererLegacy = new CpuRendererLegacy();
+            WindowRenderLegacy windowRenderLegacy = new WindowRenderLegacy(GameWindowSettings.Default, settings, shaderGl,
+                cpuRendererLegacy, entities, camera);
+            windowRenderLegacy.Run();
         }
     }
 }
