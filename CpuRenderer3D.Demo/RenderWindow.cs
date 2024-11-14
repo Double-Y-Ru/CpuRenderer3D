@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace CpuRenderer3D.Demo
 {
-    public class WindowRender : GameWindow
+    public class RenderWindow : GameWindow
     {
         private readonly CpuRenderer _renderer;
         private readonly IShaderProgram _shaderProgram;
@@ -38,7 +38,7 @@ namespace CpuRenderer3D.Demo
 
         private bool dirty = true;
 
-        public WindowRender(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
+        public RenderWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
             CpuRenderer renderer, IReadOnlyList<Entity> entities, IShaderProgram shaderProgram, RenderingContext renderingContext)
             : base(gameWindowSettings, nativeWindowSettings)
         {

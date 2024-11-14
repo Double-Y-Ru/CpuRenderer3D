@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace CpuRenderer3D.Demo
 {
-    public class WindowRenderLegacy : GameWindow
+    public class RenderWindowLegacy : GameWindow
     {
         private readonly CpuRendererLegacy _renderer;
         private IReadOnlyList<Entity> _entities;
@@ -37,7 +37,7 @@ namespace CpuRenderer3D.Demo
 
         private bool dirty = true;
 
-        public WindowRenderLegacy(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
+        public RenderWindowLegacy(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
             CpuRendererLegacy renderer, IReadOnlyList<Entity> entities, Transform camera)
             : base(gameWindowSettings, nativeWindowSettings)
         {
