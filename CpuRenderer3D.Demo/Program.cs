@@ -31,10 +31,6 @@ namespace CpuRenderer3D.Demo
             Entity[] entities = new Entity[1];
             entities[0] = new Entity(new Transform(), mesh);
 
-            ShaderGL shaderGl = new ShaderGL(
-                System.Text.Encoding.Default.GetString(Resource.vertShader),
-                System.Text.Encoding.Default.GetString(Resource.fragShader));
-
             int width = 800;
             int height = 600;
             NativeWindowSettings settings = NativeWindowSettings.Default;
@@ -63,12 +59,12 @@ namespace CpuRenderer3D.Demo
             IShaderProgram shaderProgram = new UnlitShaderProgram();
             CpuRenderer cpuRenderer = new CpuRenderer();
 
-            WindowRender windowRender = new WindowRender(GameWindowSettings.Default, settings, shaderGl,
+            WindowRender windowRender = new WindowRender(GameWindowSettings.Default, settings,
                 cpuRenderer, entities, shaderProgram, renderingContext);
             windowRender.Run();
 
             CpuRendererLegacy cpuRendererLegacy = new CpuRendererLegacy();
-            WindowRenderLegacy windowRenderLegacy = new WindowRenderLegacy(GameWindowSettings.Default, settings, shaderGl,
+            WindowRenderLegacy windowRenderLegacy = new WindowRenderLegacy(GameWindowSettings.Default, settings,
                 cpuRendererLegacy, entities, camera);
             windowRenderLegacy.Run();
         }

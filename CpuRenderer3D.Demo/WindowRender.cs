@@ -32,13 +32,13 @@ namespace CpuRenderer3D.Demo
         private int VOB;
         private int VAO;
 
-        private readonly ShaderGL _shaderGl;
-        private Texture _texture;
+        private ShaderGL? _shaderGl;
+        private Texture? _texture;
         private Transform _camera;
 
         private bool dirty = true;
 
-        public WindowRender(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, ShaderGL shaderGl,
+        public WindowRender(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
             CpuRenderer renderer, Entity[] entities, IShaderProgram shaderProgram, RenderingContext renderingContext)
             : base(gameWindowSettings, nativeWindowSettings)
         {
@@ -47,8 +47,6 @@ namespace CpuRenderer3D.Demo
             _renderingContext = renderingContext;
             _entities = entities;
 
-            _shaderGl = shaderGl;
-            _texture = new Texture();
             _camera = new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity);
         }
 
@@ -56,9 +54,11 @@ namespace CpuRenderer3D.Demo
         {
             base.OnLoad();
 
-            _shaderGl.Init();
-            _texture.Init();
-            _texture.Bind(_renderingContext.ColorBuffer.GetData(), _renderingContext.ColorBuffer.Width, _renderingContext.ColorBuffer.Height);
+            _shaderGl = new ShaderGL(
+                System.Text.Encoding.Default.GetString(Resource.vertShader),
+                System.Text.Encoding.Default.GetString(Resource.fragShader));
+
+            _texture = new Texture(_renderingContext.ColorBuffer.GetData(), _renderingContext.ColorBuffer.Width, _renderingContext.ColorBuffer.Height);
 
             VOB = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VOB);
@@ -81,6 +81,8 @@ namespace CpuRenderer3D.Demo
 
         protected override void OnUnload()
         {
+            _shaderGl!.Dispose();
+
             base.OnUnload();
         }
 
@@ -99,8 +101,8 @@ namespace CpuRenderer3D.Demo
             base.OnRenderFrame(e);
 
             _renderer.Render(_entities, _shaderProgram, _renderingContext);
-            _texture.Replace(_renderingContext.ColorBuffer.GetData(), _renderingContext.ColorBuffer.Width, _renderingContext.ColorBuffer.Height);
-            _shaderGl.Use();
+            _texture!.Replace(_renderingContext.ColorBuffer.GetData(), _renderingContext.ColorBuffer.Width, _renderingContext.ColorBuffer.Height);
+            _shaderGl!.Use();
 
             GL.BindVertexArray(VAO);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);

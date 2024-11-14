@@ -30,14 +30,14 @@ namespace CpuRenderer3D.Demo
         private int VOB;
         private int VAO;
 
-        private readonly ShaderGL _shaderGl;
-        private Texture _texture;
+        private ShaderGL? _shaderGl;
+        private Texture? _texture;
         private Transform _camera;
         private Bytemap _bytemap;
 
         private bool dirty = true;
 
-        public WindowRenderLegacy(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, ShaderGL shaderGl,
+        public WindowRenderLegacy(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
             CpuRendererLegacy renderer, Entity[] entities, Transform camera)
             : base(gameWindowSettings, nativeWindowSettings)
         {
@@ -45,8 +45,6 @@ namespace CpuRenderer3D.Demo
             _entities = entities;
             _camera = camera;
 
-            _shaderGl = shaderGl;
-            _texture = new Texture();
             _bytemap = new Bytemap(nativeWindowSettings.ClientSize.X, nativeWindowSettings.ClientSize.Y);
         }
 
@@ -54,9 +52,11 @@ namespace CpuRenderer3D.Demo
         {
             base.OnLoad();
 
-            _shaderGl.Init();
-            _texture.Init();
-            _texture.Bind(_bytemap);
+            _shaderGl = new ShaderGL(
+                System.Text.Encoding.Default.GetString(Resource.vertShader),
+                System.Text.Encoding.Default.GetString(Resource.fragShader));
+
+            _texture = new Texture(_bytemap);
 
             VOB = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VOB);
@@ -79,6 +79,9 @@ namespace CpuRenderer3D.Demo
 
         protected override void OnUnload()
         {
+            _texture!.Dispose();
+            _shaderGl!.Dispose();
+
             base.OnUnload();
         }
 
@@ -97,8 +100,8 @@ namespace CpuRenderer3D.Demo
             base.OnRenderFrame(e);
 
             _renderer.Render(_camera, _entities, _bytemap);
-            _texture.Replace(_bytemap);
-            _shaderGl.Use();
+            _texture!.Replace(_bytemap);
+            _shaderGl!.Use();
 
             GL.BindVertexArray(VAO);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
