@@ -32,8 +32,8 @@ namespace CpuRenderer3D
             entities[0] = new Entity(new Transform(), mesh);
 
             ShaderGL shaderGl = new ShaderGL(
-                File.ReadAllText(@"C:\Project\CpuRenderer3D\shader1.vert"),
-                File.ReadAllText(@"C:\Project\CpuRenderer3D\shader.frag"));
+                System.Text.Encoding.Default.GetString(Resource.vertShader),
+                System.Text.Encoding.Default.GetString(Resource.fragShader));
 
             int width = 800;
             int height = 600;
