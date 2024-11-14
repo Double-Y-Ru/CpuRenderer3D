@@ -2,7 +2,7 @@
 
 namespace CpuRenderer3D
 {
-    public struct Transform
+    public struct Transform : IEquatable<Transform>
     {
         public Vector3 Origin;
         public Quaternion Rotation;
@@ -34,6 +34,21 @@ namespace CpuRenderer3D
         public static bool operator !=(Transform a, Transform b)
         {
             return !(a == b);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return (obj is Transform other) && Equals(other);
+        }
+
+        public bool Equals(Transform other)
+        {
+            return Origin.Equals(other.Origin) && Rotation.Equals(other.Rotation);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Origin, Rotation);
         }
     }
 }

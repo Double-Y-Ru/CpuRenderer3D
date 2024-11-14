@@ -7,8 +7,8 @@ namespace CpuRenderer3D
     {
         static void Main(string[] args)
         {
-            Mesh tooth13 = ObjParser.Parse(File.ReadAllText(@"C:\Games\tooth_13.obj"));
-            Mesh tooth14 = ObjParser.Parse(File.ReadAllText(@"C:\Games\tooth_14.obj"));
+            //Mesh tooth13 = ObjParser.Parse(File.ReadAllText(@"C:\Games\tooth_13.obj"));
+            //Mesh tooth14 = ObjParser.Parse(File.ReadAllText(@"C:\Games\tooth_14.obj"));
 
             Vector3[] vertices = new Vector3[]
             {
@@ -56,7 +56,7 @@ namespace CpuRenderer3D
             RenderingContext renderingContext = new RenderingContext(
                 colorBuffer: new Buffer<Vector4>(width, height, Vector4.Zero),
                 zBuffer: new Buffer<float>(width, height, 1f),
-                worldView: worldView, 
+                worldView: worldView,
                 viewProjection: Matrix4x4.CreatePerspectiveFieldOfView((float)(0.5f * Math.PI), aspect, nearPlane, farPlane),
                 clipView: screenScale);
 

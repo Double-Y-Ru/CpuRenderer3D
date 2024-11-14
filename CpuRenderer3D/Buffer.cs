@@ -6,15 +6,15 @@
         public readonly int Width;
         public readonly int Height;
 
-        private readonly T[] data;
+        private readonly T[] _data;
 
         public Buffer(int width, int height, T defaultValue)
         {
             Width = width;
             Height = height;
-            this.DefaultDataValue = defaultValue;
+            DefaultDataValue = defaultValue;
 
-            data = new T[Width * Height];
+            _data = new T[Width * Height];
             Clear();
         }
 
@@ -24,7 +24,7 @@
             {
                 int index = (y * Width + x);
 
-                data[index] = value;
+                _data[index] = value;
             }
         }
 
@@ -34,7 +34,7 @@
             {
                 int index = (y * Width + x);
 
-                result = data[index];
+                result = _data[index];
                 return true;
             }
 
@@ -45,14 +45,14 @@
         public T[] GetData()
         {
             T[] result = new T[Width * Height];
-            data.CopyTo(result, 0);
+            _data.CopyTo(result, 0);
             return result;
         }
 
         public void Clear()
         {
-            for (int i = 0; i < data.Length; i++)
-                data[i] = this.DefaultDataValue;
+            for (int i = 0; i < _data.Length; i++)
+                _data[i] = DefaultDataValue;
         }
     }
 }

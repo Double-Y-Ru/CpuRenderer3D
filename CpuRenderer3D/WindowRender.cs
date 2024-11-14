@@ -22,7 +22,7 @@ namespace CpuRenderer3D
             -1f,  1f, 0.0f, 0.0f, 1.0f
         };
 
-        private readonly uint[] _indices = 
+        private readonly uint[] _indices =
         {
             0, 1, 2,
             0, 2, 3
@@ -39,7 +39,7 @@ namespace CpuRenderer3D
         private bool dirty = true;
 
         public WindowRender(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, ShaderGL shaderGl,
-            CpuRenderer renderer,  Entity[] entities, ShaderProgram shaderProgram, RenderingContext renderingContext)
+            CpuRenderer renderer, Entity[] entities, ShaderProgram shaderProgram, RenderingContext renderingContext)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _renderer = renderer;
@@ -55,7 +55,7 @@ namespace CpuRenderer3D
         protected override void OnLoad()
         {
             base.OnLoad();
-            
+
             _shaderGl.Init();
             _texture.Init();
             _texture.Bind(_renderingContext.ColorBuffer.GetData(), _renderingContext.ColorBuffer.Width, _renderingContext.ColorBuffer.Height);
