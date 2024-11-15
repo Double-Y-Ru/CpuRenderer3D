@@ -63,37 +63,39 @@ namespace CpuRenderer3D
             if (f0.Position.Y > f2.Position.Y) Swap(ref f0, ref f2);
             if (f1.Position.Y > f2.Position.Y) Swap(ref f1, ref f2);
 
-            FragmentInput LeftPoint, RightPoint;
-            Vector4 pixelColor;
-            float totalHeight = f2.Position.Y - f0.Position.Y;
-            int secondSegmentRelativeY = (int)float.Round(f1.Position.Y - f0.Position.Y);
+            int lowerY = (int)float.Round(f0.Position.Y);
+            int rightY = (int)float.Round(f1.Position.Y);
+            int upperY = (int)float.Round(f2.Position.Y);
 
-            int baseY = (int)f0.Position.Y;
+            float tLeft = 0f;
+            float tLeftDelta = 1f / (upperY - lowerY);
 
-            for (int relativeY = 0; relativeY < secondSegmentRelativeY; relativeY++)
+            float tRightLower = 0f;
+            float tRightLowerDelta = 1f / (rightY - lowerY);
+
+            float tRightUpper = 0f;
+            float tRightUpperDelta = 1f / (upperY - rightY);
+
+            for (int y = lowerY; y <= rightY; ++y)
             {
-                float segmentHeight = f1.Position.Y - f0.Position.Y;
+                FragmentInput leftPoint = FragmentInput.Interpolate(f0, f2, tLeft);
+                FragmentInput rightPoint = FragmentInput.Interpolate(f0, f1, tRightLower);
 
-                float alpha = relativeY / totalHeight;
-                float beta = relativeY / segmentHeight;
+                DrawHorizontalLine(leftPoint, rightPoint, y);
 
-                LeftPoint = FragmentInput.Interpolate(f0, f2, alpha);
-                RightPoint = FragmentInput.Interpolate(f0, f1, beta);
-
-                DrawHorizontalLine(LeftPoint, RightPoint, baseY + relativeY);
+                tLeft += tLeftDelta;
+                tRightLower += tRightLowerDelta;
             }
 
-            for (int relativeY = secondSegmentRelativeY; relativeY < totalHeight; relativeY++)
+            for (int y = rightY + 1; y <= upperY; ++y)
             {
-                float segmentHeight = f2.Position.Y - f1.Position.Y;
+                FragmentInput leftPoint = FragmentInput.Interpolate(f0, f2, tLeft);
+                FragmentInput rightPoint = FragmentInput.Interpolate(f1, f2, tRightUpper);
 
-                float alpha = relativeY / totalHeight;
-                float beta = (relativeY - secondSegmentRelativeY) / segmentHeight;
+                DrawHorizontalLine(leftPoint, rightPoint, y);
 
-                LeftPoint = FragmentInput.Interpolate(f0, f2, alpha);
-                RightPoint = FragmentInput.Interpolate(f1, f2, beta);
-
-                DrawHorizontalLine(LeftPoint, RightPoint, baseY + relativeY);
+                tLeft += tLeftDelta;
+                tRightUpper += tRightUpperDelta;
             }
 
             void DrawHorizontalLine(FragmentInput lineStart, FragmentInput lineEnd, int y)
@@ -101,18 +103,16 @@ namespace CpuRenderer3D
                 if (lineStart.Position.X > lineEnd.Position.X)
                     Swap(ref lineStart, ref lineEnd);
 
-                int lineStartX = (int)lineStart.Position.X;
-                int lineEndX = (int)lineEnd.Position.X;
-
-                int lineWidth = lineEndX - lineStartX + 1;
+                int lineStartX = (int)float.Round(lineStart.Position.X);
+                int lineEndX = (int)float.Round(lineEnd.Position.X);
 
                 float t = 0;
-                float dt = 1f / lineWidth;
+                float dt = 1f / (lineEndX - lineStartX + 1);
 
                 for (int x = lineStartX; x <= lineEndX; x++)
                 {
                     FragmentInput pixel = FragmentInput.Interpolate(lineStart, lineEnd, t);
-                    pixelColor = shaderProgram.ComputeColor(pixel, shaderContext);
+                    Vector4 pixelColor = shaderProgram.ComputeColor(pixel, shaderContext);
                     if (!shaderContext.ZBuffer.TryGet(x, y, out float zFromBuffer)) continue;
                     if (pixel.Position.Z > zFromBuffer) continue;
 
