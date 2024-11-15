@@ -23,9 +23,9 @@ namespace CpuRenderer3D.Demo
 
                 for (int i = 0; i < triangles.Length; i++)
                 {
-                    Vector3 triangleV1P = Vector4.Transform(mesh.GetVertex(triangles[i].First), modelProjection).XYZDivW();
-                    Vector3 triangleV2P = Vector4.Transform(mesh.GetVertex(triangles[i].Second), modelProjection).XYZDivW();
-                    Vector3 triangleV3P = Vector4.Transform(mesh.GetVertex(triangles[i].Third), modelProjection).XYZDivW();
+                    Vector3 triangleV1P = Vector4.Transform(mesh.GetVertex(triangles[i].V0), modelProjection).XYZDivW();
+                    Vector3 triangleV2P = Vector4.Transform(mesh.GetVertex(triangles[i].V1), modelProjection).XYZDivW();
+                    Vector3 triangleV3P = Vector4.Transform(mesh.GetVertex(triangles[i].V2), modelProjection).XYZDivW();
 
                     Vector3 triangleNormalP = Vector3.Cross(
                         triangleV1P - triangleV2P,

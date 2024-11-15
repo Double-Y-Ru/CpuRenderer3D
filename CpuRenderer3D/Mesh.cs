@@ -2,44 +2,44 @@
 
 namespace CpuRenderer3D
 {
-    public record struct Triangle(int First, int Second, int Third);
+    public record struct Triangle(int V0, int V1, int V2);
     public record struct Edge(int FirstVertex, int SecondVertex);
 
     public class Mesh
     {
-        private Vector3[] vertices;
-        private Triangle[] triangles;
+        private readonly Vector3[] _vertices;
+        private readonly Triangle[] _triangles;
 
         public Mesh(Vector3[] vertices, Triangle[] triangleIndexes)
         {
-            this.vertices = vertices;
-            this.triangles = new Triangle[triangleIndexes.Length];
+            _vertices = vertices;
+            _triangles = new Triangle[triangleIndexes.Length];
 
             for (int i = 0; i < triangleIndexes.Length; i++)
-                triangles[i] = new Triangle(triangleIndexes[i].First, triangleIndexes[i].Second, triangleIndexes[i].Third);
+                _triangles[i] = new Triangle(triangleIndexes[i].V0, triangleIndexes[i].V1, triangleIndexes[i].V2);
         }
 
-        public Vector3[] GetVertices() => vertices;
+        public Vector3[] GetVertices() => _vertices;
 
         public Triangle[] GetTriangles()
         {
-            return triangles;
+            return _triangles;
         }
 
         public Vector3 GetVertex(int index)
         {
-            return vertices[index];
+            return _vertices[index];
         }
 
         public Edge[] GetEdges()
         {
-            Edge[] edges = new Edge[triangles.Length * 3];
-            for (int i = 0; i < triangles.Length; i++)
+            Edge[] edges = new Edge[_triangles.Length * 3];
+            for (int i = 0; i < _triangles.Length; i++)
             {
-                Triangle t = triangles[i];
-                edges[i * 3] = new Edge(t.First, t.Second);
-                edges[i * 3 + 1] = new Edge(t.Second, t.Third);
-                edges[i * 3 + 2] = new Edge(t.Third, t.First);
+                Triangle t = _triangles[i];
+                edges[i * 3] = new Edge(t.V0, t.V1);
+                edges[i * 3 + 1] = new Edge(t.V1, t.V2);
+                edges[i * 3 + 2] = new Edge(t.V2, t.V0);
             }
 
             //var r = edges.Distinct().ToArray();

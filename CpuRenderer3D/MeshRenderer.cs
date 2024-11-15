@@ -6,8 +6,8 @@ namespace CpuRenderer3D
     {
         public void Render(Entity entity, RenderingContext shaderContext, IShaderProgram shaderProgram)
         {
-            VertexInput fstV, sndV, trdV;
-            FragmentInput fstF, sndF, trdF;
+            VertexInput vertInput0, vertInput1, vertInput2;
+            FragmentInput fragInput0, fragInput1, fragInput2;
 
             shaderContext.SetModelWorld(entity.Transform.GetMatrix());
 
@@ -18,36 +18,36 @@ namespace CpuRenderer3D
             {
                 Triangle triangle = triangles[i];
 
-                fstV = new VertexInput(mesh.GetVertex(triangle.First), new Vector3(), new Vector4(0.2f, 0.2f, 0.2f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
-                sndV = new VertexInput(mesh.GetVertex(triangle.Second), new Vector3(), new Vector4(0.2f, 0.2f, 0.2f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
-                trdV = new VertexInput(mesh.GetVertex(triangle.Third), new Vector3(), new Vector4(0.2f, 0.2f, 0.2f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                vertInput0 = new VertexInput(mesh.GetVertex(triangle.V0), new Vector3(), new Vector4(0.8f, 0.0f, 0.0f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                vertInput1 = new VertexInput(mesh.GetVertex(triangle.V1), new Vector3(), new Vector4(0.0f, 0.8f, 0.0f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                vertInput2 = new VertexInput(mesh.GetVertex(triangle.V2), new Vector3(), new Vector4(0.0f, 0.0f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
 
-                fstF = shaderProgram.ComputeVertex(fstV, shaderContext);
-                sndF = shaderProgram.ComputeVertex(sndV, shaderContext);
-                trdF = shaderProgram.ComputeVertex(trdV, shaderContext);
+                fragInput0 = shaderProgram.ComputeVertex(vertInput0, shaderContext);
+                fragInput1 = shaderProgram.ComputeVertex(vertInput1, shaderContext);
+                fragInput2 = shaderProgram.ComputeVertex(vertInput2, shaderContext);
 
                 Vector3 triangleNormalP = Vector3.Cross(
-                    fstF.Position - sndF.Position,
-                    fstF.Position - trdF.Position);
+                    fragInput0.Position - fragInput1.Position,
+                    fragInput0.Position - fragInput2.Position);
 
                 if (Vector3.Dot(triangleNormalP, Vector3.UnitZ) < 0) continue;
 
-                if (-1f < fstF.Position.X && fstF.Position.X < 1f
-                 && -1f < fstF.Position.Y && fstF.Position.Y < 1f
-                 && -1f < fstF.Position.Z && fstF.Position.Z < 1f
-                 && -1f < sndF.Position.X && sndF.Position.X < 1f
-                 && -1f < sndF.Position.Y && sndF.Position.Y < 1f
-                 && -1f < sndF.Position.Z && sndF.Position.Z < 1f
-                 && -1f < trdF.Position.X && trdF.Position.X < 1f
-                 && -1f < trdF.Position.Y && trdF.Position.Y < 1f
-                 && -1f < trdF.Position.Z && trdF.Position.Z < 1f
+                if (-1f < fragInput0.Position.X && fragInput0.Position.X < 1f
+                 && -1f < fragInput0.Position.Y && fragInput0.Position.Y < 1f
+                 && -1f < fragInput0.Position.Z && fragInput0.Position.Z < 1f
+                 && -1f < fragInput1.Position.X && fragInput1.Position.X < 1f
+                 && -1f < fragInput1.Position.Y && fragInput1.Position.Y < 1f
+                 && -1f < fragInput1.Position.Z && fragInput1.Position.Z < 1f
+                 && -1f < fragInput2.Position.X && fragInput2.Position.X < 1f
+                 && -1f < fragInput2.Position.Y && fragInput2.Position.Y < 1f
+                 && -1f < fragInput2.Position.Z && fragInput2.Position.Z < 1f
                  )
                 {
-                    fstF.Position = Vector3.Transform(fstF.Position, shaderContext.ProjectionClip);
-                    sndF.Position = Vector3.Transform(sndF.Position, shaderContext.ProjectionClip);
-                    trdF.Position = Vector3.Transform(trdF.Position, shaderContext.ProjectionClip);
+                    fragInput0.Position = Vector3.Transform(fragInput0.Position, shaderContext.ProjectionClip);
+                    fragInput1.Position = Vector3.Transform(fragInput1.Position, shaderContext.ProjectionClip);
+                    fragInput2.Position = Vector3.Transform(fragInput2.Position, shaderContext.ProjectionClip);
 
-                    DrawTriangle(shaderContext, shaderProgram, fstF, sndF, trdF);
+                    DrawTriangle(shaderContext, shaderProgram, fragInput0, fragInput1, fragInput2);
                 }
             }
         }
