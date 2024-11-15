@@ -9,9 +9,10 @@ namespace CpuRenderer3D.Demo
     public class RenderWindow : GameWindow
     {
         private readonly CpuRenderer _renderer;
-        private readonly IShaderProgram _shaderProgram;
-        private readonly RenderingContext _renderingContext;
-        private IReadOnlyList<Entity> _entities;
+        private readonly IReadOnlyList<Entity> _entities;
+        private readonly Camera _camera;
+        private readonly Buffer<Vector4> _colorBuffer;
+        private readonly Buffer<float> _depthBuffer;
 
         private readonly float[] _vertices =
         {
@@ -34,20 +35,18 @@ namespace CpuRenderer3D.Demo
 
         private ShaderGL? _shaderGl;
         private Texture? _texture;
-        private Transform _camera;
 
-        private bool dirty = true;
+        private bool _dirty = true;
 
-        public RenderWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
-            CpuRenderer renderer, IReadOnlyList<Entity> entities, IShaderProgram shaderProgram, RenderingContext renderingContext)
+        public RenderWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, int bufferWidth, int bufferHeight,
+            CpuRenderer renderer, IReadOnlyList<Entity> entities, Camera camera)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _renderer = renderer;
-            _shaderProgram = shaderProgram;
-            _renderingContext = renderingContext;
             _entities = entities;
-
-            _camera = new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity);
+            _camera = camera;
+            _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, Vector4.Zero);
+            _depthBuffer = new Buffer<float>(bufferWidth, bufferHeight, 1f);
         }
 
         protected override void OnLoad()
@@ -58,7 +57,7 @@ namespace CpuRenderer3D.Demo
                 System.Text.Encoding.Default.GetString(Resource.vertShader),
                 System.Text.Encoding.Default.GetString(Resource.fragShader));
 
-            _texture = new Texture(_renderingContext.ColorBuffer.GetData(), _renderingContext.ColorBuffer.Width, _renderingContext.ColorBuffer.Height);
+            _texture = new Texture(_colorBuffer.GetData(), _colorBuffer.Width, _colorBuffer.Height);
 
             VOB = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VOB);
@@ -75,8 +74,7 @@ namespace CpuRenderer3D.Demo
 
             int texCoordLocation = _shaderGl.GetAttribLocation("aTexCoord");
             GL.EnableVertexAttribArray(texCoordLocation);
-            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float),
-                3 * sizeof(float));
+            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
         }
 
         protected override void OnUnload()
@@ -90,71 +88,70 @@ namespace CpuRenderer3D.Demo
         {
             base.OnUpdateFrame(args);
 
-            MoveCamera();
-            RotateCamera();
+            _dirty |= TryMoveCamera(_camera);
+            _dirty |= RotateCamera(_camera);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            if (!dirty) return;
+            if (!_dirty) return;
 
             base.OnRenderFrame(e);
 
-            _renderer.Render(_entities, _shaderProgram, _renderingContext);
-            _texture!.Replace(_renderingContext.ColorBuffer.GetData(), _renderingContext.ColorBuffer.Width, _renderingContext.ColorBuffer.Height);
+            _renderer.Render(_entities, _camera, _colorBuffer, _depthBuffer);
+            _texture!.Replace(_colorBuffer.GetData(), _colorBuffer.Width, _colorBuffer.Height);
             _shaderGl!.Use();
 
             GL.BindVertexArray(VAO);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
             GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 
+            _colorBuffer.Clear();
+            _depthBuffer.Clear();
             SwapBuffers();
 
-            dirty = false;
+            _dirty = false;
         }
 
-        private void Vector4ToByte(Vector4[] vector4Map, byte[] bytemap)
+        private bool TryMoveCamera(Camera camera)
         {
-            for (int i = 0; i < vector4Map.Length; i++)
-            {
-                // xyzw = rgba
-                bytemap[i * 4] = (byte)(Math.Clamp(vector4Map[i].X, 0f, 1f) * 255);
-                bytemap[i * 4 + 1] = (byte)(Math.Clamp(vector4Map[i].Y, 0f, 1f) * 255);
-                bytemap[i * 4 + 2] = (byte)(Math.Clamp(vector4Map[i].Z, 0f, 1f) * 255);
-                bytemap[i * 4 + 3] = (byte)(Math.Clamp(vector4Map[i].W, 0f, 1f) * 255);
-            }
+            const float cameraRegularSpeedMetersPerFrame = 0.02f;
+            const float cameraHighSpeedMetersPerFrame = 0.2f;
+
+            Vector3 cameraMovementDirectionLocal = Vector3.Zero;
+
+            cameraMovementDirectionLocal.Z += KeyboardState.IsKeyDown(Keys.S) ? 1f : 0f;
+            cameraMovementDirectionLocal.Z -= KeyboardState.IsKeyDown(Keys.W) ? 1f : 0f;
+
+            cameraMovementDirectionLocal.X += KeyboardState.IsKeyDown(Keys.D) ? 1f : 0f;
+            cameraMovementDirectionLocal.X -= KeyboardState.IsKeyDown(Keys.A) ? 1f : 0f;
+
+            cameraMovementDirectionLocal.Y += KeyboardState.IsKeyDown(Keys.E) ? 1f : 0f;
+            cameraMovementDirectionLocal.Y -= KeyboardState.IsKeyDown(Keys.Q) ? 1f : 0f;
+
+            if (cameraMovementDirectionLocal.Equals(Vector3.Zero)) return false;
+
+            float speed = KeyboardState.IsKeyDown(Keys.LeftShift) ? cameraHighSpeedMetersPerFrame : cameraRegularSpeedMetersPerFrame;
+
+            camera.Transform.Origin += Vector3.Transform(cameraMovementDirectionLocal * speed, camera.Transform.Rotation);
+
+            return true;
         }
 
-        private void MoveCamera()
+        private bool RotateCamera(Camera camera)
         {
-            int dirZ = (KeyboardState.IsKeyPressed(Keys.S) ? 1 : 0) + (KeyboardState.IsKeyPressed(Keys.W) ? -1 : 0);
-            int dirX = (KeyboardState.IsKeyPressed(Keys.D) ? 1 : 0) + (KeyboardState.IsKeyPressed(Keys.A) ? -1 : 0);
-            int dirY = (KeyboardState.IsKeyPressed(Keys.E) ? 1 : 0) + (KeyboardState.IsKeyPressed(Keys.Q) ? -1 : 0);
-            Matrix4x4 forward = Matrix4x4.CreateFromQuaternion(_camera.Rotation);
-            Vector3 zMoving = Vector3.Transform(Vector3.UnitZ, forward) * dirZ;
-            Vector3 xMooving = Vector3.Transform(Vector3.UnitX, forward) * dirX;
-            Vector3 yMooving = Vector3.Transform(Vector3.UnitY, forward) * dirY;
-            if (zMoving == Vector3.Zero &&
-                xMooving == Vector3.Zero &&
-                yMooving == Vector3.Zero) return;
+            const float cameraRotationRadsPerPixel = 0.002f;
 
-            Vector3 dir = Vector3.Normalize(zMoving + xMooving + yMooving);
-            _camera.Origin += new Vector3(dir.X, dir.Y, dir.Z);
-            dirty = true;
-        }
+            if (!MouseState.IsButtonDown(MouseButton.Right)) return false;
 
-        private void RotateCamera()
-        {
-            int rotY = (KeyboardState.IsKeyPressed(Keys.Left) ? -1 : 0) + (KeyboardState.IsKeyPressed(Keys.Right) ? 1 : 0);
-            int rotX = (KeyboardState.IsKeyPressed(Keys.Up) ? -1 : 0) + (KeyboardState.IsKeyPressed(Keys.Down) ? 1 : 0);
-            Vector2 rotate = new Vector2(rotX, rotY);
-            if (rotate == Vector2.Zero) return;
+            Vector3 cameraEulerRotationDeltaPx = new Vector3(-MouseState.Delta.Y, -MouseState.Delta.X, 0f);
 
-            const float sensitivity = 5f;
-            float yawDelta = -(float)(rotate.Y / 180 * Math.PI) * sensitivity;
-            float pitchDelta = -(float)(rotate.X / 180 * Math.PI) * sensitivity;
-            _camera.Rotation *= Quaternion.CreateFromYawPitchRoll(yawDelta, pitchDelta, 0f);
-            dirty = true;
+            if (cameraEulerRotationDeltaPx.Equals(Vector3.Zero)) return false;
+
+            Vector3 cameraEulerRotation = EulerAngles.QuaternionToEuler(camera.Transform.Rotation);
+            camera.Transform.Rotation = EulerAngles.EulerToQuaternion(cameraEulerRotation + cameraEulerRotationDeltaPx * cameraRotationRadsPerPixel);
+
+            return true;
         }
     }
 }

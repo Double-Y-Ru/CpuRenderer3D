@@ -8,8 +8,8 @@ namespace CpuRenderer3D.Demo
         const int WindowWidth = 1024;
         const int WindowHeight = 768;
 
-        const int BufferWidth = 1024;
-        const int BufferHeight = 768;
+        const int BufferWidth = 512;
+        const int BufferHeight = 384;
 
         static void Main(string[] args)
         {
@@ -18,35 +18,28 @@ namespace CpuRenderer3D.Demo
 
             List<Entity> entities = new List<Entity>();
 
+            IShaderProgram shaderProgram = new UnlitShaderProgram();
+
             foreach (string meshPath in args)
             {
                 Mesh mesh = ObjParser.Parse(File.ReadAllText(meshPath));
-                entities.Add(new Entity(new Transform(), mesh));
+                entities.Add(new Entity(new Transform(), mesh, shaderProgram));
             }
 
             NativeWindowSettings settings = NativeWindowSettings.Default;
             settings.ClientSize = new OpenTK.Mathematics.Vector2i(WindowWidth, WindowHeight);
 
-            Camera camera = new Camera(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), 0.1f, 200f, (float)BufferWidth / BufferHeight);
+            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.5 * Math.PI), 0.1f, 200f);
 
-            RenderingContext renderingContext = new RenderingContext(
-                colorBuffer: new Buffer<Vector4>(BufferWidth, BufferHeight, Vector4.Zero),
-                depthBuffer: new Buffer<float>(BufferWidth, BufferHeight, 1f),
-                worldView: camera.GetWorldViewMatrix(),
-                viewProjection: camera.GetViewProjectionMatrix(),
-                projectionClip: Util.CreateProjectionClip(BufferWidth, BufferHeight));
-
-            IShaderProgram shaderProgram = new UnlitShaderProgram();
             CpuRenderer cpuRenderer = new CpuRenderer();
 
-            RenderWindow windowRender = new RenderWindow(GameWindowSettings.Default, settings,
-                cpuRenderer, entities, shaderProgram, renderingContext);
-            windowRender.Run();
+            RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, cpuRenderer, entities, camera);
+            renderWindow.Run();
 
             CpuRendererLegacy cpuRendererLegacy = new CpuRendererLegacy();
-            RenderWindowLegacy windowRenderLegacy = new RenderWindowLegacy(GameWindowSettings.Default, settings,
-                cpuRendererLegacy, entities, camera, BufferWidth, BufferHeight);
-            windowRenderLegacy.Run();
+
+            RenderWindowLegacy renderWindowLegacy = new RenderWindowLegacy(GameWindowSettings.Default, settings, cpuRendererLegacy, entities, camera, BufferWidth, BufferHeight);
+            renderWindowLegacy.Run();
         }
     }
 }
