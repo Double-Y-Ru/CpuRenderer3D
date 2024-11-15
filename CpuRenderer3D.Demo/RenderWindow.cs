@@ -1,8 +1,9 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using System.Numerics;
+using CpuRenderer3D.Demo.GlObjects;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Numerics;
 
 namespace CpuRenderer3D.Demo
 {
@@ -29,12 +30,12 @@ namespace CpuRenderer3D.Demo
             0, 2, 3
         };
 
-        private int EBO;
-        private int VOB;
-        private int VAO;
+        private readonly GlBuffer _elementBuffer;
+        private readonly GlBuffer _vertexBuffer;
+        private readonly GlVertexArray _vertexArray;
 
         private ShaderGL? _shaderGl;
-        private Texture? _texture;
+        private readonly GlTexture _texture;
 
         private bool _dirty = true;
 
@@ -47,6 +48,11 @@ namespace CpuRenderer3D.Demo
             _camera = camera;
             _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, Vector4.Zero);
             _depthBuffer = new Buffer<float>(bufferWidth, bufferHeight, 1f);
+
+            _texture = new GlTexture();
+            _vertexBuffer = new GlBuffer();
+            _elementBuffer = new GlBuffer();
+            _vertexArray = new GlVertexArray();
         }
 
         protected override void OnLoad()
@@ -57,28 +63,38 @@ namespace CpuRenderer3D.Demo
                 System.Text.Encoding.Default.GetString(Resource.vertShader),
                 System.Text.Encoding.Default.GetString(Resource.fragShader));
 
-            _texture = new Texture(_colorBuffer.GetData(), _colorBuffer.Width, _colorBuffer.Height);
+            using (BoundGlTexture texture = _texture.Bind())
+            {
+                texture.SetupParameters();
+                texture.SetImage(_colorBuffer);
+            }
 
-            VOB = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VOB);
-            GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.DynamicDraw);
+            using BoundGlBuffer boundVertexBuffer = _vertexBuffer.Bind(BufferTarget.ArrayBuffer);
+            using BoundGlBuffer boundElementBuffer = _elementBuffer.Bind(BufferTarget.ElementArrayBuffer);
 
-            EBO = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices, BufferUsageHint.DynamicDraw);
+            boundVertexBuffer.SetData(_vertices.Length * sizeof(float), _vertices, BufferUsageHint.DynamicDraw);
+            boundElementBuffer.SetData(_indices.Length * sizeof(uint), _indices, BufferUsageHint.DynamicDraw);
 
-            VAO = GL.GenVertexArray();
-            GL.BindVertexArray(VAO);
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(0);
+            using (BoundGlVertexArray boundVertexArray = _vertexArray.Bind())
+            {
+                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
 
-            int texCoordLocation = _shaderGl.GetAttribLocation("aTexCoord");
-            GL.EnableVertexAttribArray(texCoordLocation);
-            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+                GL.EnableVertexAttribArray(0);
+
+                int texCoordLocation = _shaderGl.GetAttribLocation("aTexCoord");
+                GL.EnableVertexAttribArray(texCoordLocation);
+                GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+            }
         }
 
         protected override void OnUnload()
         {
+            _texture.Dispose();
+            _vertexBuffer.Dispose();
+            _elementBuffer.Dispose();
+            _vertexArray.Dispose();
+
             _shaderGl!.Dispose();
 
             base.OnUnload();
@@ -99,12 +115,21 @@ namespace CpuRenderer3D.Demo
             base.OnRenderFrame(e);
 
             _renderer.Render(_entities, _camera, _colorBuffer, _depthBuffer);
-            _texture!.Replace(_colorBuffer.GetData(), _colorBuffer.Width, _colorBuffer.Height);
-            _shaderGl!.Use();
 
-            GL.BindVertexArray(VAO);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
-            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+            using (BoundGlVertexArray boundVertexArray = _vertexArray.Bind())
+            {
+                using (BoundGlTexture texture = _texture.Bind())
+                {
+                    texture.UpdateImage(_colorBuffer);
+
+                    _shaderGl!.Use();
+
+                    using (BoundGlBuffer boundelementBuffer = _elementBuffer.Bind(BufferTarget.ElementArrayBuffer))
+                    {
+                        GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+                    }
+                }
+            }
 
             _colorBuffer.Clear();
             _depthBuffer.Clear();

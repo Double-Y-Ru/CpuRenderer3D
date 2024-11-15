@@ -5,11 +5,11 @@ namespace CpuRenderer3D.Demo
 {
     internal class Program
     {
-        const int WindowWidth = 1024;
-        const int WindowHeight = 768;
+        const int WindowWidth = 512;
+        const int WindowHeight = 384;
 
-        const int BufferWidth = 512;
-        const int BufferHeight = 384;
+        const int BufferWidth = 1024;
+        const int BufferHeight = 768;
 
         static void Main(string[] args)
         {

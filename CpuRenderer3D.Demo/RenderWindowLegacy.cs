@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using CpuRenderer3D.Demo.GlObjects;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -31,7 +32,7 @@ namespace CpuRenderer3D.Demo
         private int VAO;
 
         private ShaderGL? _shaderGl;
-        private Texture? _texture;
+        private GlTexture _texture;
         private Camera _camera;
         private Bytemap _bytemap;
 
@@ -46,6 +47,7 @@ namespace CpuRenderer3D.Demo
             _camera = camera;
 
             _bytemap = new Bytemap(bufferWidth, bufferHeight);
+            _texture = new GlTexture();
         }
 
         protected override void OnLoad()
@@ -56,7 +58,11 @@ namespace CpuRenderer3D.Demo
                 System.Text.Encoding.Default.GetString(Resource.vertShader),
                 System.Text.Encoding.Default.GetString(Resource.fragShader));
 
-            _texture = new Texture(_bytemap);
+            using (BoundGlTexture texture = _texture.Bind())
+            {
+                texture.SetupParameters();
+                texture.SetImage(_bytemap);
+            }
 
             VOB = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VOB);
@@ -73,8 +79,7 @@ namespace CpuRenderer3D.Demo
 
             int texCoordLocation = _shaderGl.GetAttribLocation("aTexCoord");
             GL.EnableVertexAttribArray(texCoordLocation);
-            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float),
-                3 * sizeof(float));
+            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
         }
 
         protected override void OnUnload()
@@ -100,12 +105,20 @@ namespace CpuRenderer3D.Demo
             base.OnRenderFrame(e);
 
             _renderer.Render(_camera, _entities, _bytemap);
-            _texture!.Replace(_bytemap);
-            _shaderGl!.Use();
 
-            GL.BindVertexArray(VAO);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
-            GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+            using (BoundGlTexture texture = _texture.Bind())
+            {
+                texture.UpdateImage(_bytemap);
+                _shaderGl!.Use();
+
+                GL.BindVertexArray(VAO);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
+
+                GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
+
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+                GL.BindVertexArray(0);
+            }
 
             SwapBuffers();
 

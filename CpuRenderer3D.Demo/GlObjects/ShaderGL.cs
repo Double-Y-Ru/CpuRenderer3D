@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace CpuRenderer3D.Demo
+namespace CpuRenderer3D.Demo.GlObjects
 {
     public class ShaderGL : IDisposable
     {
