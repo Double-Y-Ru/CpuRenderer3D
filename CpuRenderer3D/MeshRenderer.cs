@@ -43,10 +43,9 @@ namespace CpuRenderer3D
                  && -1f < trdF.Position.Z && trdF.Position.Z < 1f
                  )
                 {
-                    // новый
-                    fstF.Position = Vector3.Transform(fstF.Position, shaderContext.ClipView);
-                    sndF.Position = Vector3.Transform(sndF.Position, shaderContext.ClipView);
-                    trdF.Position = Vector3.Transform(trdF.Position, shaderContext.ClipView);
+                    fstF.Position = Vector3.Transform(fstF.Position, shaderContext.ProjectionClip);
+                    sndF.Position = Vector3.Transform(sndF.Position, shaderContext.ProjectionClip);
+                    trdF.Position = Vector3.Transform(trdF.Position, shaderContext.ProjectionClip);
 
                     DrawTriangle(shaderContext, shaderProgram, fstF, sndF, trdF);
                 }
@@ -100,7 +99,6 @@ namespace CpuRenderer3D
                     Swap(ref LeftPoint, ref RightPoint);
 
                 lineWidth = (int)RightPoint.Position.X - (int)LeftPoint.Position.X + 1;
-                if (lineWidth == 0) lineWidth = 1;
                 for (int x = (int)LeftPoint.Position.X; x <= (int)RightPoint.Position.X; x++)
                 {
                     pixel = FragmentInput.Interpolate(LeftPoint, RightPoint, (float)x / lineWidth);

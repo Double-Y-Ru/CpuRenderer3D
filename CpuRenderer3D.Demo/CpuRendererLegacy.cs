@@ -9,18 +9,17 @@ namespace CpuRenderer3D.Demo
         {
             bytemap.Clear();
 
-            Matrix4x4.Invert(camera.GetMatrix(), out Matrix4x4 invertCamera);
+            Matrix4x4.Invert(camera.GetMatrix(), out Matrix4x4 worldView);
 
             float aspect = (float)bytemap.Width / bytemap.Height;
             float nearPlane = 0.1f;
             float farPlane = 200;
-            //Matrix4x4 proj = Matrix4x4.CreateOrthographicOffCenter(left: -10 * aspect, right: 10 * aspect, 
-            //    bottom: -10, top: 10, nearPlane, farPlane);
-            Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView((float)(0.5 * Math.PI), aspect, nearPlane, farPlane);
+            //Matrix4x4 proj = Matrix4x4.CreateOrthographicOffCenter(left: -10 * aspect, right: 10 * aspect, bottom: -10, top: 10, nearPlane, farPlane);
+            Matrix4x4 viewProjection = Matrix4x4.CreatePerspectiveFieldOfView((float)(0.5 * Math.PI), aspect, nearPlane, farPlane);
 
-            Matrix4x4 projMview = invertCamera * proj;
+            Matrix4x4 worldProjection = worldView * viewProjection;
 
-            Matrix4x4 screenScale = new Matrix4x4(
+            Matrix4x4 projectionClip = new Matrix4x4(
                 0.5f * bytemap.Width, 0, 0, 0,
                 0, 0.5f * bytemap.Height, 0, 0,
                 0, 0, 1, 0,
@@ -28,21 +27,17 @@ namespace CpuRenderer3D.Demo
 
             foreach (Entity entity in entities)
             {
-                Matrix4x4 relativeTransform = entity.Transform.GetMatrix() * projMview;
+                Matrix4x4 modelWorld = entity.Transform.GetMatrix();
+                Matrix4x4 modelProjection = modelWorld * worldProjection;
 
                 Mesh mesh = entity.Mesh;
                 Triangle[] triangles = mesh.GetTriangles();
 
                 for (int i = 0; i < triangles.Length; i++)
                 {
-                    Triangle triangle = triangles[i];
-                    Vector4 triangleV1 = new Vector4(mesh.GetVertex(triangle.First), 1f);
-                    Vector4 triangleV2 = new Vector4(mesh.GetVertex(triangle.Second), 1f);
-                    Vector4 triangleV3 = new Vector4(mesh.GetVertex(triangle.Third), 1f);
-
-                    Vector3 triangleV1P = Vector4.Transform(triangleV1, relativeTransform).XYZDivW();
-                    Vector3 triangleV2P = Vector4.Transform(triangleV2, relativeTransform).XYZDivW();
-                    Vector3 triangleV3P = Vector4.Transform(triangleV3, relativeTransform).XYZDivW();
+                    Vector3 triangleV1P = Vector4.Transform(mesh.GetVertex(triangles[i].First), modelProjection).XYZDivW();
+                    Vector3 triangleV2P = Vector4.Transform(mesh.GetVertex(triangles[i].Second), modelProjection).XYZDivW();
+                    Vector3 triangleV3P = Vector4.Transform(mesh.GetVertex(triangles[i].Third), modelProjection).XYZDivW();
 
                     Vector3 triangleNormalP = Vector3.Cross(
                         triangleV1P - triangleV2P,
@@ -61,23 +56,9 @@ namespace CpuRenderer3D.Demo
                          && -1f < triangleV3P.Z && triangleV3P.Z < 1f
                          )
                         {
-                            Vector3 triangleV1S = Vector3.Transform(triangleV1P, screenScale);
-                            Vector3 triangleV2S = Vector3.Transform(triangleV2P, screenScale);
-                            Vector3 triangleV3S = Vector3.Transform(triangleV3P, screenScale);
-
-                            /*Console.WriteLine("old");
-                            Console.WriteLine("new");
-                            Console.WriteLine(invertCamera);
-                            Console.WriteLine(renderingContext.WorldView);
-                            Console.WriteLine(proj);
-                            Console.WriteLine(renderingContext.ViewProjection);
-                            Console.WriteLine(projMview);
-                            Console.WriteLine(renderingContext.WorldProjection);
-                            Console.WriteLine(relativeTransform);
-                            Console.WriteLine(renderingContext.ModelProjection);
-                            Console.WriteLine(screenScale);
-                            Console.WriteLine(renderingContext.ClipView);
-                            Console.WriteLine();*/
+                            Vector3 triangleV1S = Vector3.Transform(triangleV1P, projectionClip);
+                            Vector3 triangleV2S = Vector3.Transform(triangleV2P, projectionClip);
+                            Vector3 triangleV3S = Vector3.Transform(triangleV3P, projectionClip);
 
                             DrawTriangle(bytemap, triangleV1S, triangleV2S, triangleV3S, Color.FromArgb(45, 45, 45));
 

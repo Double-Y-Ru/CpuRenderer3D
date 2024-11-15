@@ -33,7 +33,7 @@ namespace CpuRenderer3D.Demo
             float nearPlane = 0.1f;
             float farPlane = 200;
 
-            Matrix4x4 screenScale = new Matrix4x4(
+            Matrix4x4 projectionClip = new Matrix4x4(
                 0.5f * BufferWidth, 0, 0, 0,
                 0, 0.5f * BufferHeight, 0, 0,
                 0, 0, 1, 0,
@@ -45,7 +45,7 @@ namespace CpuRenderer3D.Demo
                 zBuffer: new Buffer<float>(BufferWidth, BufferHeight, 1f),
                 worldView: worldView,
                 viewProjection: Matrix4x4.CreatePerspectiveFieldOfView((float)(0.5f * Math.PI), aspect, nearPlane, farPlane),
-                clipView: screenScale);
+                projectionClip: projectionClip);
 
             IShaderProgram shaderProgram = new UnlitShaderProgram();
             CpuRenderer cpuRenderer = new CpuRenderer();
@@ -56,7 +56,7 @@ namespace CpuRenderer3D.Demo
 
             CpuRendererLegacy cpuRendererLegacy = new CpuRendererLegacy();
             RenderWindowLegacy windowRenderLegacy = new RenderWindowLegacy(GameWindowSettings.Default, settings,
-                cpuRendererLegacy, entities, camera);
+                cpuRendererLegacy, entities, camera, BufferWidth, BufferHeight);
             windowRenderLegacy.Run();
         }
     }

@@ -38,14 +38,14 @@ namespace CpuRenderer3D.Demo
         private bool dirty = true;
 
         public RenderWindowLegacy(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
-            CpuRendererLegacy renderer, IReadOnlyList<Entity> entities, Transform camera)
+            CpuRendererLegacy renderer, IReadOnlyList<Entity> entities, Transform camera, int bufferWidth, int bufferHeight)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _renderer = renderer;
             _entities = entities;
             _camera = camera;
 
-            _bytemap = new Bytemap(nativeWindowSettings.ClientSize.X, nativeWindowSettings.ClientSize.Y);
+            _bytemap = new Bytemap(bufferWidth, bufferHeight);
         }
 
         protected override void OnLoad()
