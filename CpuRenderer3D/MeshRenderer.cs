@@ -55,10 +55,6 @@ namespace CpuRenderer3D
         private void DrawTriangle(RenderingContext shaderContext, IShaderProgram shaderProgram,
             FragmentInput f0, FragmentInput f1, FragmentInput f2)
         {
-            f0.RoundXYPos();
-            f1.RoundXYPos();
-            f2.RoundXYPos();
-
             if (f0.Position.Y == f1.Position.Y
              && f0.Position.Y == f2.Position.Y)
                 return;
@@ -67,47 +63,63 @@ namespace CpuRenderer3D
             if (f0.Position.Y > f2.Position.Y) Swap(ref f0, ref f2);
             if (f1.Position.Y > f2.Position.Y) Swap(ref f1, ref f2);
 
-            FragmentInput LeftPoint, RightPoint, pixel;
-            bool isSecondSegment;
-            int segmentHeight, lineWidth;
-            float alpha, beta, offset;
+            FragmentInput LeftPoint, RightPoint;
             Vector4 pixelColor;
-            int totalHeight = (int)f2.Position.Y - (int)f0.Position.Y;
-            int secondSegmentY = (int)f1.Position.Y - (int)f0.Position.Y;
+            float totalHeight = f2.Position.Y - f0.Position.Y;
+            int secondSegmentRelativeY = (int)float.Round(f1.Position.Y - f0.Position.Y);
 
-            for (int y = 0; y < totalHeight; y++)
+            int baseY = (int)f0.Position.Y;
+
+            for (int relativeY = 0; relativeY < secondSegmentRelativeY; relativeY++)
             {
-                isSecondSegment = y > f1.Position.Y - f0.Position.Y
-                                   || f1.Position.Y == f0.Position.Y;
-                segmentHeight = isSecondSegment
-                    ? (int)f2.Position.Y - (int)f1.Position.Y
-                    : (int)f1.Position.Y - (int)f0.Position.Y;
+                float segmentHeight = f1.Position.Y - f0.Position.Y;
 
-                offset = isSecondSegment ? secondSegmentY : 0;
-                alpha = (float)y / totalHeight;
-                beta = (float)((y - offset) / segmentHeight);
+                float alpha = relativeY / totalHeight;
+                float beta = relativeY / segmentHeight;
 
                 LeftPoint = FragmentInput.Interpolate(f0, f2, alpha);
-                RightPoint = isSecondSegment
-                    ? FragmentInput.Interpolate(f1, f2, beta)
-                    : FragmentInput.Interpolate(f0, f1, beta);
+                RightPoint = FragmentInput.Interpolate(f0, f1, beta);
 
-                LeftPoint.RoundXYPos();
-                RightPoint.RoundXYPos();
+                DrawHorizontalLine(LeftPoint, RightPoint, baseY + relativeY);
+            }
 
-                if (LeftPoint.Position.X > RightPoint.Position.X)
-                    Swap(ref LeftPoint, ref RightPoint);
+            for (int relativeY = secondSegmentRelativeY; relativeY < totalHeight; relativeY++)
+            {
+                float segmentHeight = f2.Position.Y - f1.Position.Y;
 
-                lineWidth = (int)RightPoint.Position.X - (int)LeftPoint.Position.X + 1;
-                for (int x = (int)LeftPoint.Position.X; x <= (int)RightPoint.Position.X; x++)
+                float alpha = relativeY / totalHeight;
+                float beta = (relativeY - secondSegmentRelativeY) / segmentHeight;
+
+                LeftPoint = FragmentInput.Interpolate(f0, f2, alpha);
+                RightPoint = FragmentInput.Interpolate(f1, f2, beta);
+
+                DrawHorizontalLine(LeftPoint, RightPoint, baseY + relativeY);
+            }
+
+            void DrawHorizontalLine(FragmentInput lineStart, FragmentInput lineEnd, int y)
+            {
+                if (lineStart.Position.X > lineEnd.Position.X)
+                    Swap(ref lineStart, ref lineEnd);
+
+                int lineStartX = (int)lineStart.Position.X;
+                int lineEndX = (int)lineEnd.Position.X;
+
+                int lineWidth = lineEndX - lineStartX + 1;
+
+                float t = 0;
+                float dt = 1f / lineWidth;
+
+                for (int x = lineStartX; x <= lineEndX; x++)
                 {
-                    pixel = FragmentInput.Interpolate(LeftPoint, RightPoint, (float)x / lineWidth);
-                    if (!shaderContext.ZBuffer.TryGet(x, y, out float z)) continue;
-                    if (z < pixel.Position.Z) continue;
+                    FragmentInput pixel = FragmentInput.Interpolate(lineStart, lineEnd, t);
+                    pixelColor = shaderProgram.ComputeColor(pixel, shaderContext);
+                    if (!shaderContext.ZBuffer.TryGet(x, y, out float zFromBuffer)) continue;
+                    if (pixel.Position.Z > zFromBuffer) continue;
 
                     shaderContext.ZBuffer.Set(x, y, pixel.Position.Z);
-                    pixelColor = shaderProgram.ComputeColor(pixel, shaderContext);
                     shaderContext.ColorBuffer.Set(x, y, pixelColor);
+
+                    t += dt;
                 }
             }
 
