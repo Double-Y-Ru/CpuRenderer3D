@@ -32,13 +32,13 @@ namespace CpuRenderer3D.Demo
 
         private ShaderGL? _shaderGl;
         private Texture? _texture;
-        private Transform _camera;
+        private Camera _camera;
         private Bytemap _bytemap;
 
         private bool dirty = true;
 
         public RenderWindowLegacy(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings,
-            CpuRendererLegacy renderer, IReadOnlyList<Entity> entities, Transform camera, int bufferWidth, int bufferHeight)
+            CpuRendererLegacy renderer, IReadOnlyList<Entity> entities, Camera camera, int bufferWidth, int bufferHeight)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _renderer = renderer;
@@ -117,7 +117,7 @@ namespace CpuRenderer3D.Demo
             int dirZ = (KeyboardState.IsKeyPressed(Keys.S) ? 1 : 0) + (KeyboardState.IsKeyPressed(Keys.W) ? -1 : 0);
             int dirX = (KeyboardState.IsKeyPressed(Keys.D) ? 1 : 0) + (KeyboardState.IsKeyPressed(Keys.A) ? -1 : 0);
             int dirY = (KeyboardState.IsKeyPressed(Keys.E) ? 1 : 0) + (KeyboardState.IsKeyPressed(Keys.Q) ? -1 : 0);
-            Matrix4x4 forward = Matrix4x4.CreateFromQuaternion(_camera.Rotation);
+            Matrix4x4 forward = Matrix4x4.CreateFromQuaternion(_camera.Transform.Rotation);
             Vector3 zMoving = Vector3.Transform(Vector3.UnitZ, forward) * dirZ;
             Vector3 xMooving = Vector3.Transform(Vector3.UnitX, forward) * dirX;
             Vector3 yMooving = Vector3.Transform(Vector3.UnitY, forward) * dirY;
@@ -126,7 +126,7 @@ namespace CpuRenderer3D.Demo
                 yMooving == Vector3.Zero) return;
 
             Vector3 dir = Vector3.Normalize(zMoving + xMooving + yMooving);
-            _camera.Origin += new Vector3(dir.X, dir.Y, dir.Z);
+            _camera.Transform.Origin += new Vector3(dir.X, dir.Y, dir.Z);
             dirty = true;
         }
 
@@ -140,7 +140,7 @@ namespace CpuRenderer3D.Demo
             const float sensitivity = 5f;
             float yawDelta = -(float)(rotate.Y / 180 * Math.PI) * sensitivity;
             float pitchDelta = -(float)(rotate.X / 180 * Math.PI) * sensitivity;
-            _camera.Rotation *= Quaternion.CreateFromYawPitchRoll(yawDelta, pitchDelta, 0f);
+            _camera.Transform.Rotation *= Quaternion.CreateFromYawPitchRoll(yawDelta, pitchDelta, 0f);
             dirty = true;
         }
     }

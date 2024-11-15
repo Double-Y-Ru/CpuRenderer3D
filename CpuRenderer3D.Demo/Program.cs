@@ -27,25 +27,14 @@ namespace CpuRenderer3D.Demo
             NativeWindowSettings settings = NativeWindowSettings.Default;
             settings.ClientSize = new OpenTK.Mathematics.Vector2i(WindowWidth, WindowHeight);
 
-            Transform camera = new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity);
+            Camera camera = new Camera(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), 0.1f, 200f, (float)BufferWidth / BufferHeight);
 
-            float aspect = (float)BufferWidth / BufferHeight;
-            float nearPlane = 0.1f;
-            float farPlane = 200;
-
-            Matrix4x4 projectionClip = new Matrix4x4(
-                0.5f * BufferWidth, 0, 0, 0,
-                0, 0.5f * BufferHeight, 0, 0,
-                0, 0, 1, 0,
-                0.5f * BufferWidth, 0.5f * BufferHeight, 0, 1);
-
-            Matrix4x4.Invert(camera.GetMatrix(), out Matrix4x4 worldView);
             RenderingContext renderingContext = new RenderingContext(
                 colorBuffer: new Buffer<Vector4>(BufferWidth, BufferHeight, Vector4.Zero),
                 zBuffer: new Buffer<float>(BufferWidth, BufferHeight, 1f),
-                worldView: worldView,
-                viewProjection: Matrix4x4.CreatePerspectiveFieldOfView((float)(0.5f * Math.PI), aspect, nearPlane, farPlane),
-                projectionClip: projectionClip);
+                worldView: camera.GetWorldViewMatrix(),
+                viewProjection: camera.GetViewProjectionMatrix(),
+                projectionClip: Util.CreateProjectionClip(BufferWidth, BufferHeight));
 
             IShaderProgram shaderProgram = new UnlitShaderProgram();
             CpuRenderer cpuRenderer = new CpuRenderer();

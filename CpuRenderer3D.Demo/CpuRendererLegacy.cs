@@ -5,25 +5,13 @@ namespace CpuRenderer3D.Demo
 {
     public class CpuRendererLegacy
     {
-        public void Render(Transform camera, IReadOnlyList<Entity> entities, Bytemap bytemap)
+        public void Render(Camera camera, IReadOnlyList<Entity> entities, Bytemap bytemap)
         {
             bytemap.Clear();
 
-            Matrix4x4.Invert(camera.GetMatrix(), out Matrix4x4 worldView);
+            Matrix4x4 worldProjection = camera.GetWorldViewMatrix() * camera.GetViewProjectionMatrix();
 
-            float aspect = (float)bytemap.Width / bytemap.Height;
-            float nearPlane = 0.1f;
-            float farPlane = 200;
-            //Matrix4x4 proj = Matrix4x4.CreateOrthographicOffCenter(left: -10 * aspect, right: 10 * aspect, bottom: -10, top: 10, nearPlane, farPlane);
-            Matrix4x4 viewProjection = Matrix4x4.CreatePerspectiveFieldOfView((float)(0.5 * Math.PI), aspect, nearPlane, farPlane);
-
-            Matrix4x4 worldProjection = worldView * viewProjection;
-
-            Matrix4x4 projectionClip = new Matrix4x4(
-                0.5f * bytemap.Width, 0, 0, 0,
-                0, 0.5f * bytemap.Height, 0, 0,
-                0, 0, 1, 0,
-                0.5f * bytemap.Width, 0.5f * bytemap.Height, 0, 1);
+            Matrix4x4 projectionClip = Util.CreateProjectionClip(bytemap.Width, bytemap.Height);
 
             foreach (Entity entity in entities)
             {
