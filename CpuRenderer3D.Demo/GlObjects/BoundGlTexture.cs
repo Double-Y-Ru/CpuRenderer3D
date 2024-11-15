@@ -23,7 +23,7 @@ namespace CpuRenderer3D.Demo.GlObjects
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         }
 
@@ -42,11 +42,13 @@ namespace CpuRenderer3D.Demo.GlObjects
         public void UpdateImage(Bytemap bytemap)
         {
             GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, bytemap.Width, bytemap.Height, PixelFormat.Rgba, PixelType.UnsignedByte, bytemap.GetData());
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
 
         public void UpdateImage(Buffer<Vector4> buffer)
         {
             GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, buffer.Width, buffer.Height, PixelFormat.Rgba, PixelType.Float, buffer.GetData());
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
     }
 }
