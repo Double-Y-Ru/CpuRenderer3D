@@ -113,11 +113,12 @@ namespace CpuRenderer3D
                 {
                     FragmentInput pixel = FragmentInput.Interpolate(lineStart, lineEnd, t);
                     Vector4 pixelColor = shaderProgram.ComputeColor(pixel, shaderContext);
-                    if (!shaderContext.ZBuffer.TryGet(x, y, out float zFromBuffer)) continue;
-                    if (pixel.Position.Z > zFromBuffer) continue;
 
-                    shaderContext.ZBuffer.Set(x, y, pixel.Position.Z);
-                    shaderContext.ColorBuffer.Set(x, y, pixelColor);
+                    if (shaderContext.DepthBuffer.TryGet(x, y, out float zFromBuffer) && pixel.Position.Z <= zFromBuffer)
+                    {
+                        shaderContext.DepthBuffer.Set(x, y, pixel.Position.Z);
+                        shaderContext.ColorBuffer.Set(x, y, pixelColor);
+                    }
 
                     t += dt;
                 }

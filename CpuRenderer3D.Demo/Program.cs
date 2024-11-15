@@ -31,7 +31,7 @@ namespace CpuRenderer3D.Demo
 
             RenderingContext renderingContext = new RenderingContext(
                 colorBuffer: new Buffer<Vector4>(BufferWidth, BufferHeight, Vector4.Zero),
-                zBuffer: new Buffer<float>(BufferWidth, BufferHeight, 1f),
+                depthBuffer: new Buffer<float>(BufferWidth, BufferHeight, 1f),
                 worldView: camera.GetWorldViewMatrix(),
                 viewProjection: camera.GetViewProjectionMatrix(),
                 projectionClip: Util.CreateProjectionClip(BufferWidth, BufferHeight));

@@ -7,7 +7,7 @@ namespace CpuRenderer3D
     public class RenderingContext
     {
         public readonly Buffer<Vector4> ColorBuffer;
-        public readonly Buffer<float> ZBuffer;
+        public readonly Buffer<float> DepthBuffer;
 
         public Matrix4x4 ModelWorld;// entity
         public Matrix4x4 WorldView;// camera
@@ -18,11 +18,11 @@ namespace CpuRenderer3D
         public Matrix4x4 ModelProjection;// ModelWorld * ModelProjection 
         public Matrix4x4 ModelClip;// ProjectionClip * ClipView
 
-        public RenderingContext(Buffer<Vector4> colorBuffer, Buffer<float> zBuffer,
+        public RenderingContext(Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer,
             Matrix4x4 worldView, Matrix4x4 viewProjection, Matrix4x4 projectionClip)
         {
             ColorBuffer = colorBuffer;
-            ZBuffer = zBuffer;
+            DepthBuffer = depthBuffer;
 
             WorldView = worldView;
             ViewProjection = viewProjection;
