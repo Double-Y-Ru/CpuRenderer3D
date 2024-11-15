@@ -8,8 +8,8 @@ namespace CpuRenderer3D.Demo
         const int WindowWidth = 1024;
         const int WindowHeight = 768;
 
-        const int BufferWidth = 800;
-        const int BufferHeight = 600;
+        const int BufferWidth = 1024;
+        const int BufferHeight = 768;
 
         static void Main(string[] args)
         {
