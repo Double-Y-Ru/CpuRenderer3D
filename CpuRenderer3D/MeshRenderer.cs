@@ -68,15 +68,15 @@ namespace CpuRenderer3D
             int upperY = (int)float.Round(f2.Position.Y);
 
             float tLeft = 0f;
-            float tLeftDelta = 1f / (upperY - lowerY);
+            float tLeftDelta = 1f / (upperY - lowerY + 1);
 
             float tRightLower = 0f;
-            float tRightLowerDelta = 1f / (rightY - lowerY);
+            float tRightLowerDelta = 1f / (rightY - lowerY + 1);
 
             float tRightUpper = 0f;
-            float tRightUpperDelta = 1f / (upperY - rightY);
+            float tRightUpperDelta = 1f / (upperY - rightY + 1);
 
-            for (int y = lowerY; y <= rightY; ++y)
+            for (int y = lowerY; y < rightY; ++y)
             {
                 FragmentInput leftPoint = FragmentInput.Interpolate(f0, f2, tLeft);
                 FragmentInput rightPoint = FragmentInput.Interpolate(f0, f1, tRightLower);
@@ -87,7 +87,7 @@ namespace CpuRenderer3D
                 tRightLower += tRightLowerDelta;
             }
 
-            for (int y = rightY + 1; y <= upperY; ++y)
+            for (int y = rightY; y <= upperY; ++y)
             {
                 FragmentInput leftPoint = FragmentInput.Interpolate(f0, f2, tLeft);
                 FragmentInput rightPoint = FragmentInput.Interpolate(f1, f2, tRightUpper);
