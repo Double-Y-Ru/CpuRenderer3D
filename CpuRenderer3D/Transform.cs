@@ -26,6 +26,22 @@ namespace CpuRenderer3D
             return b * a;
         }
 
+        public Matrix4x4 GetInvertedMatrix()
+        {
+            Matrix4x4.Invert(GetMatrix(), out Matrix4x4 inverted);
+            return inverted;
+        }
+
+        public Vector3 UnitX() => Vector3.Transform(Vector3.UnitX, GetMatrix());
+        public Vector3 UnitY() => Vector3.Transform(Vector3.UnitY, GetMatrix());
+        public Vector3 UnitZ() => Vector3.Transform(Vector3.UnitZ, GetMatrix());
+
+        public Vector3 FromLocal(Vector3 vector) => Vector3.Transform(vector, GetMatrix());
+        public Vector4 FromLocal(Vector4 vector) => Vector4.Transform(vector, GetMatrix());
+
+        public Vector3 ToLocal(Vector3 vector) => Vector3.Transform(vector, GetInvertedMatrix());
+        public Vector4 ToLocal(Vector4 vector) => Vector4.Transform(vector, GetInvertedMatrix());
+
         public static bool operator ==(Transform a, Transform b)
         {
             return a.Origin == b.Origin && a.Rotation == b.Rotation;
