@@ -21,7 +21,7 @@ namespace CpuRenderer3D.Demo
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
 
-        public Texture(Bytemap bytemap)
+        public Texture(Bytemap bytemap) : this()
         {
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
                 bytemap.Width, bytemap.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, bytemap.GetData());
