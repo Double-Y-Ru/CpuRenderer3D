@@ -7,27 +7,30 @@ namespace CpuRenderer3D
         private readonly Mesh _mesh;
         private readonly IShaderProgram _shaderProgram;
 
+        private readonly FragmentInput[] _fragVerticesCache;
+
         public MeshRenderer(Mesh mesh, IShaderProgram shaderProgram)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
+            _fragVerticesCache = new FragmentInput[_mesh.GetVertices().Length];
         }
 
         public void Render(RenderingContext renderingContext)
         {
-            Triangle[] triangles = _mesh.GetTriangles();
-
-            for (int i = 0; i < triangles.Length; i++)
+            for (int vid = 0; vid < _mesh.GetVertices().Length; ++vid)
             {
-                Triangle triangle = triangles[i];
+                VertexInput vertInput = new VertexInput(_mesh.GetVertex(vid), new Vector3(), new Vector4(0.2f, 0.2f, 0.2f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                _fragVerticesCache[vid] = _shaderProgram.ComputeVertex(vertInput, renderingContext);
+            }
 
-                VertexInput vertInput0 = new VertexInput(_mesh.GetVertex(triangle.V0), new Vector3(), new Vector4(0.8f, 0.0f, 0.0f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
-                VertexInput vertInput1 = new VertexInput(_mesh.GetVertex(triangle.V1), new Vector3(), new Vector4(0.0f, 0.8f, 0.0f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
-                VertexInput vertInput2 = new VertexInput(_mesh.GetVertex(triangle.V2), new Vector3(), new Vector4(0.0f, 0.0f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+            for (int i = 0; i < _mesh.GetTriangles().Length; i++)
+            {
+                Triangle triangle = _mesh.GetTriangles()[i];
 
-                FragmentInput fragInput0 = _shaderProgram.ComputeVertex(vertInput0, renderingContext);
-                FragmentInput fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
-                FragmentInput fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
+                FragmentInput fragInput0 = _fragVerticesCache[triangle.V0];
+                FragmentInput fragInput1 = _fragVerticesCache[triangle.V1];
+                FragmentInput fragInput2 = _fragVerticesCache[triangle.V2];
 
                 Vector3 triangleNormalP = Vector3.Cross(
                     fragInput0.Position - fragInput1.Position,

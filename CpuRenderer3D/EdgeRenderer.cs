@@ -7,22 +7,29 @@ namespace CpuRenderer3D
         private readonly Mesh _mesh;
         private readonly IShaderProgram _shaderProgram;
 
+        private readonly FragmentInput[] _fragVerticesCache;
+
         public EdgeRenderer(Mesh mesh, IShaderProgram shaderProgram)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
+            _fragVerticesCache = new FragmentInput[_mesh.GetVertices().Length];
         }
 
         public void Render(RenderingContext renderingContext)
         {
-            Edge[] edges = _mesh.GetEdges();
-            for (int eid = 0; eid < edges.Length; eid++)
+            for (int vid = 0; vid < _mesh.GetVertices().Length; ++vid)
             {
-                VertexInput edgeV0 = new VertexInput(_mesh.GetVertex(edges[eid].V0), new Vector3(), new Vector4(0.8f, 0.8f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
-                VertexInput edgeV1 = new VertexInput(_mesh.GetVertex(edges[eid].V1), new Vector3(), new Vector4(0.8f, 0.8f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                VertexInput vertInput = new VertexInput(_mesh.GetVertex(vid), new Vector3(), new Vector4(0.5f, 0.5f, 0.5f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                _fragVerticesCache[vid] = _shaderProgram.ComputeVertex(vertInput, renderingContext);
+            }
 
-                FragmentInput fragInput0 = _shaderProgram.ComputeVertex(edgeV0, renderingContext);
-                FragmentInput fragInput1 = _shaderProgram.ComputeVertex(edgeV1, renderingContext);
+            for (int eid = 0; eid < _mesh.GetEdges().Length; eid++)
+            {
+                Edge edge = _mesh.GetEdges()[eid];
+
+                FragmentInput fragInput0 = _fragVerticesCache[edge.V0];
+                FragmentInput fragInput1 = _fragVerticesCache[edge.V1];
 
                 if (-1f < fragInput0.Position.X && fragInput0.Position.X < 1f
                  && -1f < fragInput0.Position.Y && fragInput0.Position.Y < 1f
