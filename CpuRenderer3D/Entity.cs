@@ -12,7 +12,7 @@
             Transform = transform;
             Mesh = mesh;
             MeshRenderer = new MeshRenderer(mesh, meshShaderProgram);
-            EdgeRenderer = new EdgeRenderer(mesh, edgeShaderProgram);
+            EdgeRenderer = new ContourRenderer(mesh, edgeShaderProgram);
         }
     }
 }
