@@ -15,7 +15,8 @@ namespace CpuRenderer3D
 
             foreach (Entity entity in entities)
             {
-                entity.MeshRenderer.Render(entity, renderingContext, entity.ShaderProgram);
+                entity.MeshRenderer.Render(entity, renderingContext, entity.MeshShaderProgram);
+                entity.EdgeRenderer.Render(entity, renderingContext, entity.EdgeShaderProgram);
             }
         }
     }

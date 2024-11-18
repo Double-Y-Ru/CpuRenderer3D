@@ -5,14 +5,19 @@
         public Transform Transform;
         public Mesh Mesh;
         public IRenderer MeshRenderer;
-        public IShaderProgram ShaderProgram;
+        public IShaderProgram MeshShaderProgram;
 
-        public Entity(Transform transform, Mesh mesh, IShaderProgram shaderProgram)
+        public IRenderer EdgeRenderer;
+        public IShaderProgram EdgeShaderProgram;
+
+        public Entity(Transform transform, Mesh mesh, IShaderProgram meshShaderProgram, IShaderProgram edgeShaderProgram)
         {
             Transform = transform;
             Mesh = mesh;
-            ShaderProgram = shaderProgram;
+            MeshShaderProgram = meshShaderProgram;
+            EdgeShaderProgram = edgeShaderProgram;
             MeshRenderer = new MeshRenderer();
+            EdgeRenderer = new EdgeRenderer();
         }
     }
 }

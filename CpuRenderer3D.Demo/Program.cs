@@ -23,13 +23,13 @@ namespace CpuRenderer3D.Demo
             foreach (string meshPath in args)
             {
                 Mesh mesh = ObjParser.Parse(File.ReadAllText(meshPath));
-                entities.Add(new Entity(new Transform(), mesh, shaderProgram));
+                entities.Add(new Entity(new Transform(), mesh, shaderProgram, shaderProgram));
             }
 
             NativeWindowSettings settings = NativeWindowSettings.Default;
             settings.ClientSize = new OpenTK.Mathematics.Vector2i(WindowWidth, WindowHeight);
 
-            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.5 * Math.PI), 0.1f, 200f);
+            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.5 * Math.PI), 0.1f, 20f);
 
             CpuRendererAdapter cpuRenderer = new CpuRendererAdapter(new CpuRenderer());
 
