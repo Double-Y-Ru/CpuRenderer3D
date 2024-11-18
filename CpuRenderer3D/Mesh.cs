@@ -1,49 +1,78 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace CpuRenderer3D
 {
+    //public record struct Edge(int V0, int V1, int T0, int T1);
     public record struct Triangle(int V0, int V1, int V2);
-    public record struct Edge(int FirstVertex, int SecondVertex);
+    public record struct Edge(int V0, int V1, int[] Tris);
 
     public class Mesh
     {
         private readonly Vector3[] _vertices;
         private readonly Triangle[] _triangles;
+        private readonly Edge[] _edges;
 
-        public Mesh(Vector3[] vertices, Triangle[] triangleIndexes)
+        private Mesh(Vector3[] vertices, Triangle[] triangles, Edge[] edges)
         {
             _vertices = vertices;
-            _triangles = new Triangle[triangleIndexes.Length];
-
-            for (int i = 0; i < triangleIndexes.Length; i++)
-                _triangles[i] = new Triangle(triangleIndexes[i].V0, triangleIndexes[i].V1, triangleIndexes[i].V2);
+            _triangles = triangles;
+            _edges = edges;
         }
 
         public Vector3[] GetVertices() => _vertices;
-
-        public Triangle[] GetTriangles()
-        {
-            return _triangles;
-        }
+        public Triangle[] GetTriangles() => _triangles;
+        public Edge[] GetEdges() => _edges;
 
         public Vector3 GetVertex(int index)
         {
             return _vertices[index];
         }
 
-        public Edge[] GetEdges()
+        public static Mesh Create(Vector3[] vertices, Triangle[] triangles)
         {
-            Edge[] edges = new Edge[_triangles.Length * 3];
-            for (int i = 0; i < _triangles.Length; i++)
+            Dictionary<EdgeKey, HashSet<int>> edgeTrisMap = new Dictionary<EdgeKey, HashSet<int>>(new BareEdgeComparer());
+
+            for (int tid = 0; tid < triangles.Length; tid++)
             {
-                Triangle t = _triangles[i];
-                edges[i * 3] = new Edge(t.V0, t.V1);
-                edges[i * 3 + 1] = new Edge(t.V1, t.V2);
-                edges[i * 3 + 2] = new Edge(t.V2, t.V0);
+                Triangle tri = triangles[tid];
+
+                AccumulateEdgeTriangle(new EdgeKey(tri.V0, tri.V1), tid);
+                AccumulateEdgeTriangle(new EdgeKey(tri.V1, tri.V2), tid);
+                AccumulateEdgeTriangle(new EdgeKey(tri.V2, tri.V0), tid);
             }
 
-            //var r = edges.Distinct().ToArray();
-            return edges;
+            Edge[] edges = edgeTrisMap.Select(edgeTris => new Edge(edgeTris.Key.V0, edgeTris.Key.V1, edgeTris.Value.ToArray())).ToArray();
+
+            return new Mesh(vertices, triangles, edges);
+
+            void AccumulateEdgeTriangle(EdgeKey edge, int triangleId)
+            {
+                if (edgeTrisMap.TryGetValue(edge, out HashSet<int>? edgeTris))
+                    edgeTris.Add(triangleId);
+                else
+                    edgeTrisMap[edge] = new HashSet<int>() { triangleId };
+            }
+        }
+
+        public readonly record struct EdgeKey
+        {
+            public readonly int V0;
+            public readonly int V1;
+
+            public EdgeKey(int v0, int v1)
+            {
+                bool isAscendingOrder = v0 < v1;
+
+                V0 = isAscendingOrder ? v0 : v1;
+                V1 = isAscendingOrder ? v1 : v0;
+            }
+        }
+
+        private class BareEdgeComparer : IEqualityComparer<EdgeKey>
+        {
+            public bool Equals(EdgeKey a, EdgeKey b) => a.V0 == b.V0 && a.V1 == b.V1;
+            public int GetHashCode([DisallowNull] EdgeKey edge) => HashCode.Combine(edge.V0, edge.V1);
         }
     }
 }

@@ -19,13 +19,13 @@ namespace CpuRenderer3D.Demo
                 Matrix4x4 modelProjection = modelWorld * worldProjection;
 
                 Mesh mesh = entity.Mesh;
-                Triangle[] triangles = mesh.GetTriangles();
 
-                for (int i = 0; i < triangles.Length; i++)
+                Triangle[] triangles = mesh.GetTriangles();
+                for (int tid = 0; tid < triangles.Length; tid++)
                 {
-                    Vector3 triangleV1P = Vector4.Transform(mesh.GetVertex(triangles[i].V0), modelProjection).XYZDivW();
-                    Vector3 triangleV2P = Vector4.Transform(mesh.GetVertex(triangles[i].V1), modelProjection).XYZDivW();
-                    Vector3 triangleV3P = Vector4.Transform(mesh.GetVertex(triangles[i].V2), modelProjection).XYZDivW();
+                    Vector3 triangleV1P = Vector4.Transform(mesh.GetVertex(triangles[tid].V0), modelProjection).XYZDivW();
+                    Vector3 triangleV2P = Vector4.Transform(mesh.GetVertex(triangles[tid].V1), modelProjection).XYZDivW();
+                    Vector3 triangleV3P = Vector4.Transform(mesh.GetVertex(triangles[tid].V2), modelProjection).XYZDivW();
 
                     Vector3 triangleNormalP = Vector3.Cross(
                         triangleV1P - triangleV2P,
@@ -49,11 +49,27 @@ namespace CpuRenderer3D.Demo
                             Vector3 triangleV3S = Vector3.Transform(triangleV3P, projectionClip);
 
                             DrawTriangle(triangleV1S, triangleV2S, triangleV3S, triangleColor, colorBuffer, depthBuffer);
-
-                            DrawLine(triangleV1S - Vector3.UnitZ * 0.0001f, triangleV2S - Vector3.UnitZ * 0.0001f, lineColor, colorBuffer, depthBuffer);
-                            DrawLine(triangleV1S - Vector3.UnitZ * 0.0001f, triangleV3S - Vector3.UnitZ * 0.0001f, lineColor, colorBuffer, depthBuffer);
-                            DrawLine(triangleV2S - Vector3.UnitZ * 0.0001f, triangleV3S - Vector3.UnitZ * 0.0001f, lineColor, colorBuffer, depthBuffer);
                         }
+                    }
+                }
+
+                Edge[] edges = mesh.GetEdges();
+                for (int eid = 0; eid < edges.Length; eid++)
+                {
+                    Vector3 edgeV0P = Vector4.Transform(mesh.GetVertex(edges[eid].V0), modelProjection).XYZDivW();
+                    Vector3 edgeV1P = Vector4.Transform(mesh.GetVertex(edges[eid].V1), modelProjection).XYZDivW();
+
+                    if (-1f < edgeV0P.X && edgeV0P.X < 1f
+                     && -1f < edgeV0P.Y && edgeV0P.Y < 1f
+                     && -1f < edgeV0P.Z && edgeV0P.Z < 1f
+                     && -1f < edgeV1P.X && edgeV1P.X < 1f
+                     && -1f < edgeV1P.Y && edgeV1P.Y < 1f
+                     && -1f < edgeV1P.Z && edgeV1P.Z < 1f)
+                    {
+                        Vector3 edgeV0S = Vector3.Transform(edgeV0P, projectionClip) - Vector3.UnitZ * 0.0001f;
+                        Vector3 edgeV1S = Vector3.Transform(edgeV1P, projectionClip) - Vector3.UnitZ * 0.0001f;
+
+                        DrawLine(edgeV0S, edgeV1S, lineColor, colorBuffer, depthBuffer);
                     }
                 }
             }

@@ -56,7 +56,7 @@ namespace CpuRenderer3D.Demo
                 counter++;
             }
 
-            return new Mesh(vertices, triangles);
+            return Mesh.Create(vertices, triangles);
         }
     }
 }
