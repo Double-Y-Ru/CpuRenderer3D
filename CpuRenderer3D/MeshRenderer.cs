@@ -4,24 +4,30 @@ namespace CpuRenderer3D
 {
     public class MeshRenderer : IRenderer
     {
-        public void Render(Entity entity, RenderingContext shaderContext, IShaderProgram shaderProgram)
-        {
-            shaderContext.SetModelWorld(entity.Transform.GetMatrix());
+        private readonly Mesh _mesh;
+        private readonly IShaderProgram _shaderProgram;
 
-            Mesh mesh = entity.Mesh;
-            Triangle[] triangles = mesh.GetTriangles();
+        public MeshRenderer(Mesh mesh, IShaderProgram shaderProgram)
+        {
+            _mesh = mesh;
+            _shaderProgram = shaderProgram;
+        }
+
+        public void Render(RenderingContext renderingContext)
+        {
+            Triangle[] triangles = _mesh.GetTriangles();
 
             for (int i = 0; i < triangles.Length; i++)
             {
                 Triangle triangle = triangles[i];
 
-                VertexInput vertInput0 = new VertexInput(mesh.GetVertex(triangle.V0), new Vector3(), new Vector4(0.8f, 0.0f, 0.0f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
-                VertexInput vertInput1 = new VertexInput(mesh.GetVertex(triangle.V1), new Vector3(), new Vector4(0.0f, 0.8f, 0.0f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
-                VertexInput vertInput2 = new VertexInput(mesh.GetVertex(triangle.V2), new Vector3(), new Vector4(0.0f, 0.0f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                VertexInput vertInput0 = new VertexInput(_mesh.GetVertex(triangle.V0), new Vector3(), new Vector4(0.8f, 0.0f, 0.0f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                VertexInput vertInput1 = new VertexInput(_mesh.GetVertex(triangle.V1), new Vector3(), new Vector4(0.0f, 0.8f, 0.0f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                VertexInput vertInput2 = new VertexInput(_mesh.GetVertex(triangle.V2), new Vector3(), new Vector4(0.0f, 0.0f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
 
-                FragmentInput fragInput0 = shaderProgram.ComputeVertex(vertInput0, shaderContext);
-                FragmentInput fragInput1 = shaderProgram.ComputeVertex(vertInput1, shaderContext);
-                FragmentInput fragInput2 = shaderProgram.ComputeVertex(vertInput2, shaderContext);
+                FragmentInput fragInput0 = _shaderProgram.ComputeVertex(vertInput0, renderingContext);
+                FragmentInput fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
+                FragmentInput fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
 
                 Vector3 triangleNormalP = Vector3.Cross(
                     fragInput0.Position - fragInput1.Position,
@@ -40,11 +46,11 @@ namespace CpuRenderer3D
                  && -1f < fragInput2.Position.Z && fragInput2.Position.Z < 1f
                  )
                 {
-                    fragInput0.Position = Vector3.Transform(fragInput0.Position, shaderContext.ProjectionClip);
-                    fragInput1.Position = Vector3.Transform(fragInput1.Position, shaderContext.ProjectionClip);
-                    fragInput2.Position = Vector3.Transform(fragInput2.Position, shaderContext.ProjectionClip);
+                    fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ProjectionClip);
+                    fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ProjectionClip);
+                    fragInput2.Position = Vector3.Transform(fragInput2.Position, renderingContext.ProjectionClip);
 
-                    DrawTriangle(shaderContext, shaderProgram, fragInput0, fragInput1, fragInput2);
+                    DrawTriangle(renderingContext, _shaderProgram, fragInput0, fragInput1, fragInput2);
                 }
             }
         }

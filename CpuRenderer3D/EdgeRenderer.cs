@@ -4,20 +4,25 @@ namespace CpuRenderer3D
 {
     public class EdgeRenderer : IRenderer
     {
-        public void Render(Entity entity, RenderingContext shaderContext, IShaderProgram shaderProgram)
+        private readonly Mesh _mesh;
+        private readonly IShaderProgram _shaderProgram;
+
+        public EdgeRenderer(Mesh mesh, IShaderProgram shaderProgram)
         {
-            shaderContext.SetModelWorld(entity.Transform.GetMatrix());
+            _mesh = mesh;
+            _shaderProgram = shaderProgram;
+        }
 
-            Mesh mesh = entity.Mesh;
-
-            Edge[] edges = mesh.GetEdges();
+        public void Render(RenderingContext renderingContext)
+        {
+            Edge[] edges = _mesh.GetEdges();
             for (int eid = 0; eid < edges.Length; eid++)
             {
-                VertexInput edgeV0 = new VertexInput(mesh.GetVertex(edges[eid].V0), new Vector3(), new Vector4(0.8f, 0.8f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
-                VertexInput edgeV1 = new VertexInput(mesh.GetVertex(edges[eid].V1), new Vector3(), new Vector4(0.8f, 0.8f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                VertexInput edgeV0 = new VertexInput(_mesh.GetVertex(edges[eid].V0), new Vector3(), new Vector4(0.8f, 0.8f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                VertexInput edgeV1 = new VertexInput(_mesh.GetVertex(edges[eid].V1), new Vector3(), new Vector4(0.8f, 0.8f, 0.8f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
 
-                FragmentInput fragInput0 = shaderProgram.ComputeVertex(edgeV0, shaderContext);
-                FragmentInput fragInput1 = shaderProgram.ComputeVertex(edgeV1, shaderContext);
+                FragmentInput fragInput0 = _shaderProgram.ComputeVertex(edgeV0, renderingContext);
+                FragmentInput fragInput1 = _shaderProgram.ComputeVertex(edgeV1, renderingContext);
 
                 if (-1f < fragInput0.Position.X && fragInput0.Position.X < 1f
                  && -1f < fragInput0.Position.Y && fragInput0.Position.Y < 1f
@@ -26,10 +31,10 @@ namespace CpuRenderer3D
                  && -1f < fragInput1.Position.Y && fragInput1.Position.Y < 1f
                  && -1f < fragInput1.Position.Z && fragInput1.Position.Z < 1f)
                 {
-                    fragInput0.Position = Vector3.Transform(fragInput0.Position, shaderContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
-                    fragInput1.Position = Vector3.Transform(fragInput1.Position, shaderContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
+                    fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
+                    fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
 
-                    DrawLine(shaderContext, shaderProgram, fragInput0, fragInput1);
+                    DrawLine(renderingContext, _shaderProgram, fragInput0, fragInput1);
                 }
             }
         }
