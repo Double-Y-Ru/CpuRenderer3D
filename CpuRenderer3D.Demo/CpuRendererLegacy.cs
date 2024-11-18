@@ -1,17 +1,17 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace CpuRenderer3D.Demo
 {
-    public class CpuRendererLegacy
+    public class CpuRendererLegacy : ICpuRenderer
     {
-        public void Render(Camera camera, IReadOnlyList<Entity> entities, Bytemap bytemap)
+        public void Render(IReadOnlyList<Entity> entities, Camera camera, Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer)
         {
-            bytemap.Clear();
-
             Matrix4x4 worldProjection = camera.GetWorldViewMatrix() * camera.GetViewProjectionMatrix();
 
-            Matrix4x4 projectionClip = Util.CreateProjectionClip(bytemap.Width, bytemap.Height);
+            Matrix4x4 projectionClip = Util.CreateProjectionClip(colorBuffer.Width, colorBuffer.Height);
+
+            Vector4 triangleColor = new Vector4(0.2f, 0.2f, 0.2f, 1f);
+            Vector4 lineColor = new Vector4(0.5f, 0.5f, 0.5f, 1f);
 
             foreach (Entity entity in entities)
             {
@@ -48,28 +48,23 @@ namespace CpuRenderer3D.Demo
                             Vector3 triangleV2S = Vector3.Transform(triangleV2P, projectionClip);
                             Vector3 triangleV3S = Vector3.Transform(triangleV3P, projectionClip);
 
-                            DrawTriangle(bytemap, triangleV1S, triangleV2S, triangleV3S, Color.FromArgb(45, 45, 45));
+                            DrawTriangle(triangleV1S, triangleV2S, triangleV3S, triangleColor, colorBuffer, depthBuffer);
 
-                            DrawLine(bytemap, triangleV1S - Vector3.UnitZ * 0.0001f, triangleV2S - Vector3.UnitZ * 0.0001f, Color.DarkGray);
-                            DrawLine(bytemap, triangleV1S - Vector3.UnitZ * 0.0001f, triangleV3S - Vector3.UnitZ * 0.0001f, Color.DarkGray);
-                            DrawLine(bytemap, triangleV2S - Vector3.UnitZ * 0.0001f, triangleV3S - Vector3.UnitZ * 0.0001f, Color.DarkGray);
+                            DrawLine(triangleV1S - Vector3.UnitZ * 0.0001f, triangleV2S - Vector3.UnitZ * 0.0001f, lineColor, colorBuffer, depthBuffer);
+                            DrawLine(triangleV1S - Vector3.UnitZ * 0.0001f, triangleV3S - Vector3.UnitZ * 0.0001f, lineColor, colorBuffer, depthBuffer);
+                            DrawLine(triangleV2S - Vector3.UnitZ * 0.0001f, triangleV3S - Vector3.UnitZ * 0.0001f, lineColor, colorBuffer, depthBuffer);
                         }
                     }
                 }
             }
         }
 
-        private void DrawPixel(Bytemap bytemap, Vector3iif v, Color color)
+        private void DrawLine(Vector3 v0, Vector3 v1, Vector4 color, Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer)
         {
-            bytemap.SetPixel(v, color);
+            DrawLine(new Vector3iif(v0), new Vector3iif(v1), color, colorBuffer, depthBuffer);
         }
 
-        private void DrawLine(Bytemap bytemap, Vector3 v0, Vector3 v1, Color color)
-        {
-            DrawLine(bytemap, new Vector3iif(v0), new Vector3iif(v1), color);
-        }
-
-        private void DrawLine(Bytemap bytemap, Vector3iif v0, Vector3iif v1, Color color)
+        private void DrawLine(Vector3iif v0, Vector3iif v1, Vector4 color, Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer)
         {
             bool steep = false;
             if (Math.Abs(v0.X - v1.X) < Math.Abs(v0.Y - v1.Y))
@@ -96,11 +91,11 @@ namespace CpuRenderer3D.Demo
             {
                 if (steep)
                 {
-                    DrawPixel(bytemap, new Vector3iif(y, x, z), color);
+                    DrawPixel(new Vector3iif(y, x, z), color, colorBuffer, depthBuffer);
                 }
                 else
                 {
-                    DrawPixel(bytemap, new Vector3iif(x, y, z), color);
+                    DrawPixel(new Vector3iif(x, y, z), color, colorBuffer, depthBuffer);
                 }
                 error2 += derror2;
 
@@ -121,7 +116,7 @@ namespace CpuRenderer3D.Demo
             }
         }
 
-        private void DrawTriangle(Bytemap bytemap, Vector3 v0, Vector3 v1, Vector3 v2, Color color)
+        private void DrawTriangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector4 color, Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer)
         {
             Vector3iif t0 = new Vector3iif(v0);
             Vector3iif t1 = new Vector3iif(v1);
@@ -146,7 +141,7 @@ namespace CpuRenderer3D.Demo
                 float z = A.Z;
                 for (int x = A.X; x <= B.X; x++)
                 {
-                    DrawPixel(bytemap, new Vector3iif(x, t0.Y + y, z), color);
+                    DrawPixel(new Vector3iif(x, t0.Y + y, z), color, colorBuffer, depthBuffer);
                     z += dz;
                 }
             }
@@ -156,6 +151,15 @@ namespace CpuRenderer3D.Demo
                 Vector3iif c = a;
                 a = b;
                 b = c;
+            }
+        }
+
+        private void DrawPixel(Vector3iif v, Vector4 color, Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer)
+        {
+            if (depthBuffer.TryGet(v.X, v.Y, out float zFromBuffer) && v.Z <= zFromBuffer)
+            {
+                depthBuffer.Set(v.X, v.Y, v.Z);
+                colorBuffer.Set(v.X, v.Y, color);
             }
         }
     }

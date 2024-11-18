@@ -9,7 +9,7 @@ namespace CpuRenderer3D.Demo
 {
     public class RenderWindow : GameWindow
     {
-        private readonly CpuRenderer _renderer;
+        private readonly ICpuRenderer _renderer;
         private readonly IReadOnlyList<Entity> _entities;
         private readonly Camera _camera;
         private readonly Buffer<Vector4> _colorBuffer;
@@ -40,13 +40,13 @@ namespace CpuRenderer3D.Demo
         private bool _dirty = true;
 
         public RenderWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, int bufferWidth, int bufferHeight,
-            CpuRenderer renderer, IReadOnlyList<Entity> entities, Camera camera)
+            ICpuRenderer renderer, IReadOnlyList<Entity> entities, Camera camera)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _renderer = renderer;
             _entities = entities;
             _camera = camera;
-            _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, Vector4.Zero);
+            _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, default);
             _depthBuffer = new Buffer<float>(bufferWidth, bufferHeight, 1f);
 
             _texture = new GlTexture();
@@ -106,6 +106,8 @@ namespace CpuRenderer3D.Demo
 
             _dirty |= TryMoveCamera(_camera);
             _dirty |= RotateCamera(_camera);
+
+            if (KeyboardState.IsKeyDown(Keys.Escape)) Close();
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)

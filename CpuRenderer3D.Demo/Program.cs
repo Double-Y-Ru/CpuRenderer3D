@@ -31,14 +31,14 @@ namespace CpuRenderer3D.Demo
 
             Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.5 * Math.PI), 0.1f, 200f);
 
-            CpuRenderer cpuRenderer = new CpuRenderer();
+            CpuRendererAdapter cpuRenderer = new CpuRendererAdapter(new CpuRenderer());
 
             RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, cpuRenderer, entities, camera);
             renderWindow.Run();
 
             CpuRendererLegacy cpuRendererLegacy = new CpuRendererLegacy();
 
-            RenderWindowLegacy renderWindowLegacy = new RenderWindowLegacy(GameWindowSettings.Default, settings, cpuRendererLegacy, entities, camera, BufferWidth, BufferHeight);
+            RenderWindow renderWindowLegacy = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, cpuRendererLegacy, entities, camera);
             renderWindowLegacy.Run();
         }
     }
