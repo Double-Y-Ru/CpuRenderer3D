@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using CpuRenderer3D.Demo.GlObjects;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Common;
@@ -38,6 +39,7 @@ namespace CpuRenderer3D.Demo
         private readonly GlTexture _texture;
 
         private bool _dirty = true;
+        private Stopwatch _stopWatch;
 
         public RenderWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, int bufferWidth, int bufferHeight,
             ICpuRenderer renderer, IReadOnlyList<Entity> entities, Camera camera)
@@ -53,6 +55,7 @@ namespace CpuRenderer3D.Demo
             _vertexBuffer = new GlBuffer();
             _elementBuffer = new GlBuffer();
             _vertexArray = new GlVertexArray();
+            _stopWatch = new Stopwatch();
         }
 
         protected override void OnLoad()
@@ -106,6 +109,7 @@ namespace CpuRenderer3D.Demo
 
             _dirty |= TryMoveCamera(_camera);
             _dirty |= RotateCamera(_camera);
+            _dirty |= KeyboardState.IsKeyDown(Keys.Space);
 
             if (KeyboardState.IsKeyDown(Keys.Escape)) Close();
         }
@@ -116,7 +120,13 @@ namespace CpuRenderer3D.Demo
 
             base.OnRenderFrame(e);
 
+            _stopWatch.Reset();
+            _stopWatch.Start();
+
             _renderer.Render(_entities, _camera, _colorBuffer, _depthBuffer);
+
+            _stopWatch.Stop();
+
 
             using (BoundGlVertexArray boundVertexArray = _vertexArray.Bind())
             {
@@ -136,6 +146,8 @@ namespace CpuRenderer3D.Demo
             _colorBuffer.Clear();
             _depthBuffer.Clear();
             SwapBuffers();
+
+            Console.WriteLine("RenderTime: {0} ms", _stopWatch.Elapsed.Milliseconds);
 
             _dirty = false;
         }
