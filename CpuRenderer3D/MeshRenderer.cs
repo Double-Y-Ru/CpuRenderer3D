@@ -20,7 +20,13 @@ namespace CpuRenderer3D
         {
             for (int vid = 0; vid < _mesh.GetVertices().Length; ++vid)
             {
-                VertexInput vertInput = new VertexInput(_mesh.GetVertex(vid), new Vector3(), new Vector4(0.2f, 0.2f, 0.2f, 1f), new Vector2(), new Vector2(), new Vector2(), new Vector2());
+                int colorIndex = vid % 3;
+                float colorVal = 0.5f;
+                Vector4 color = new Vector4(colorIndex == 0 ? colorVal : 0f,
+                                            colorIndex == 1 ? colorVal : 0f,
+                                            colorIndex == 2 ? colorVal : 0f, 1f);
+
+                VertexInput vertInput = new VertexInput(_mesh.GetVertex(vid), new Vector3(), color, new Vector2(), new Vector2(), new Vector2(), new Vector2());
                 _fragVerticesCache[vid] = _shaderProgram.ComputeVertex(vertInput, renderingContext);
             }
 

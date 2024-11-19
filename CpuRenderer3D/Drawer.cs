@@ -18,35 +18,29 @@ namespace CpuRenderer3D
             int rightY = (int)float.Round(f1.Position.Y);
             int upperY = (int)float.Round(f2.Position.Y);
 
-            float tLeft = 0f;
-            float tLeftDelta = 1f / (upperY - lowerY + 1);
+            FragmentInput leftFragInput = f0;
+            FragmentInput leftFragInputDelta = (f2 - f0) / (upperY - lowerY + 1);
 
-            float tRightLower = 0f;
-            float tRightLowerDelta = 1f / (rightY - lowerY + 1);
+            FragmentInput rightLowerFragInput = f0;
+            FragmentInput rightLowerFragInputDelta = (f1 - f0) / (rightY - lowerY + 1);
 
-            float tRightUpper = 0f;
-            float tRightUpperDelta = 1f / (upperY - rightY + 1);
+            FragmentInput rightUpperFragInput = f1;
+            FragmentInput rightUpperFragInputDelta = (f2 - f1) / (upperY - rightY + 1);
 
             for (int y = lowerY; y < rightY; ++y)
             {
-                FragmentInput leftPoint = FragmentInput.Interpolate(f0, f2, tLeft);
-                FragmentInput rightPoint = FragmentInput.Interpolate(f0, f1, tRightLower);
+                DrawHorizontalLine(leftFragInput, rightLowerFragInput, y);
 
-                DrawHorizontalLine(leftPoint, rightPoint, y);
-
-                tLeft += tLeftDelta;
-                tRightLower += tRightLowerDelta;
+                leftFragInput += leftFragInputDelta;
+                rightLowerFragInput += rightLowerFragInputDelta;
             }
 
             for (int y = rightY; y <= upperY; ++y)
             {
-                FragmentInput leftPoint = FragmentInput.Interpolate(f0, f2, tLeft);
-                FragmentInput rightPoint = FragmentInput.Interpolate(f1, f2, tRightUpper);
+                DrawHorizontalLine(leftFragInput, rightUpperFragInput, y);
 
-                DrawHorizontalLine(leftPoint, rightPoint, y);
-
-                tLeft += tLeftDelta;
-                tRightUpper += tRightUpperDelta;
+                leftFragInput += leftFragInputDelta;
+                rightUpperFragInput += rightUpperFragInputDelta;
             }
 
             void DrawHorizontalLine(FragmentInput lineStart, FragmentInput lineEnd, int y)
@@ -57,25 +51,23 @@ namespace CpuRenderer3D
                 int lineStartX = (int)float.Round(lineStart.Position.X);
                 int lineEndX = (int)float.Round(lineEnd.Position.X);
 
-                float t = 0;
-                float dt = 1f / (lineEndX - lineStartX + 1);
+                FragmentInput fragInput = lineStart;
+                FragmentInput deltaFragInput = (lineEnd - lineStart) / (lineEndX - lineStartX + 1);
 
                 for (int x = lineStartX; x <= lineEndX; x++)
                 {
-                    FragmentInput pixel = FragmentInput.Interpolate(lineStart, lineEnd, t);
-                    Vector4 pixelColor = shaderProgram.ComputeColor(pixel, shaderContext);
+                    Vector4 pixelColor = shaderProgram.ComputeColor(fragInput, shaderContext);
 
-                    if (shaderContext.DepthBuffer.TryGet(x, y, out float zFromBuffer) && pixel.Position.Z <= zFromBuffer)
+                    if (shaderContext.DepthBuffer.TryGet(x, y, out float zFromBuffer) && fragInput.Position.Z <= zFromBuffer)
                     {
-                        shaderContext.DepthBuffer.Set(x, y, pixel.Position.Z);
+                        shaderContext.DepthBuffer.Set(x, y, fragInput.Position.Z);
                         shaderContext.ColorBuffer.Set(x, y, pixelColor);
                     }
 
-                    t += dt;
+                    fragInput += deltaFragInput;
                 }
             }
         }
-
 
         public static void DrawLine(RenderingContext shaderContext, IShaderProgram shaderProgram, FragmentInput f0, FragmentInput f1)
         {
@@ -106,8 +98,8 @@ namespace CpuRenderer3D
             int width = gentleRightX - gentleLeftX;
             int height = gentleRightY - gentleLeftY;
 
-            float t = 0;
-            float dt = 1f / width;
+            FragmentInput fragInput = f0;
+            FragmentInput fragInputDelta = (f1 - f0) / width;
 
             int derror2 = Math.Abs(height) * 2;
             int error2 = 0;
@@ -115,22 +107,21 @@ namespace CpuRenderer3D
             int y = gentleLeftY;
             for (int x = gentleLeftX; x <= gentleRightX; x++)
             {
-                FragmentInput pixel = FragmentInput.Interpolate(f0, f1, t);
-                Vector4 pixelColor = shaderProgram.ComputeColor(pixel, shaderContext);
+                Vector4 pixelColor = shaderProgram.ComputeColor(fragInput, shaderContext);
 
                 if (isGentle)
                 {
-                    if (shaderContext.DepthBuffer.TryGet(x, y, out float zFromBuffer) && pixel.Position.Z <= zFromBuffer)
+                    if (shaderContext.DepthBuffer.TryGet(x, y, out float zFromBuffer) && fragInput.Position.Z <= zFromBuffer)
                     {
-                        shaderContext.DepthBuffer.Set(x, y, pixel.Position.Z);
+                        shaderContext.DepthBuffer.Set(x, y, fragInput.Position.Z);
                         shaderContext.ColorBuffer.Set(x, y, pixelColor);
                     }
                 }
                 else
                 {
-                    if (shaderContext.DepthBuffer.TryGet(y, x, out float zFromBuffer) && pixel.Position.Z <= zFromBuffer)
+                    if (shaderContext.DepthBuffer.TryGet(y, x, out float zFromBuffer) && fragInput.Position.Z <= zFromBuffer)
                     {
-                        shaderContext.DepthBuffer.Set(y, x, pixel.Position.Z);
+                        shaderContext.DepthBuffer.Set(y, x, fragInput.Position.Z);
                         shaderContext.ColorBuffer.Set(y, x, pixelColor);
                     }
                 }
@@ -142,7 +133,7 @@ namespace CpuRenderer3D
                     error2 -= width * 2;
                 }
 
-                t += dt;
+                fragInput += fragInputDelta;
             }
 
         }
