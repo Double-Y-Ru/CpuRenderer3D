@@ -23,9 +23,9 @@ namespace CpuRenderer3D.Demo
                 Triangle[] triangles = mesh.GetTriangles();
                 for (int tid = 0; tid < triangles.Length; tid++)
                 {
-                    Vector3 triangleV1P = Vector4.Transform(mesh.GetVertex(triangles[tid].V0), modelProjection).XYZDivW();
-                    Vector3 triangleV2P = Vector4.Transform(mesh.GetVertex(triangles[tid].V1), modelProjection).XYZDivW();
-                    Vector3 triangleV3P = Vector4.Transform(mesh.GetVertex(triangles[tid].V2), modelProjection).XYZDivW();
+                    Vector3 triangleV1P = Vector4.Transform(mesh.GetVertex(triangles[tid].Vertex0.VertexIndex), modelProjection).XYZDivW();
+                    Vector3 triangleV2P = Vector4.Transform(mesh.GetVertex(triangles[tid].Vertex1.VertexIndex), modelProjection).XYZDivW();
+                    Vector3 triangleV3P = Vector4.Transform(mesh.GetVertex(triangles[tid].Vertex2.VertexIndex), modelProjection).XYZDivW();
 
                     Vector3 triangleNormalP = Vector3.Cross(
                         triangleV1P - triangleV2P,
@@ -56,8 +56,8 @@ namespace CpuRenderer3D.Demo
                 Edge[] edges = mesh.GetEdges();
                 for (int eid = 0; eid < edges.Length; eid++)
                 {
-                    Vector3 edgeV0P = Vector4.Transform(mesh.GetVertex(edges[eid].V0), modelProjection).XYZDivW();
-                    Vector3 edgeV1P = Vector4.Transform(mesh.GetVertex(edges[eid].V1), modelProjection).XYZDivW();
+                    Vector3 edgeV0P = Vector4.Transform(mesh.GetVertex(edges[eid].Vertex0Index), modelProjection).XYZDivW();
+                    Vector3 edgeV1P = Vector4.Transform(mesh.GetVertex(edges[eid].Vertex1Index), modelProjection).XYZDivW();
 
                     if (-1f < edgeV0P.X && edgeV0P.X < 1f
                      && -1f < edgeV0P.Y && edgeV0P.Y < 1f

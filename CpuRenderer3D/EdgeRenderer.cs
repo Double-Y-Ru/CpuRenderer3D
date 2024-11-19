@@ -28,8 +28,8 @@ namespace CpuRenderer3D
             {
                 Edge edge = _mesh.GetEdges()[eid];
 
-                FragmentInput fragInput0 = _fragVerticesCache[edge.V0];
-                FragmentInput fragInput1 = _fragVerticesCache[edge.V1];
+                FragmentInput fragInput0 = _fragVerticesCache[edge.Vertex0Index];
+                FragmentInput fragInput1 = _fragVerticesCache[edge.Vertex1Index];
 
                 if (-1f < fragInput0.Position.X && fragInput0.Position.X < 1f
                  && -1f < fragInput0.Position.Y && fragInput0.Position.Y < 1f

@@ -16,11 +16,6 @@ namespace CpuRenderer3D
             Position = new Vector3(float.Round(Position.X), float.Round(Position.Y), Position.Z);
         }
 
-        public static FragmentInput Interpolate(FragmentInput from, FragmentInput to, float step)
-        {
-            return from + (to - from) * step;
-        }
-
         public static FragmentInput operator +(FragmentInput a, FragmentInput b)
         {
             return new FragmentInput(

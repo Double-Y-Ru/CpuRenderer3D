@@ -7,36 +7,25 @@ namespace CpuRenderer3D
         private readonly Mesh _mesh;
         private readonly IShaderProgram _shaderProgram;
 
-        private readonly FragmentInput[] _fragVerticesCache;
-
         public MeshRenderer(Mesh mesh, IShaderProgram shaderProgram)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
-            _fragVerticesCache = new FragmentInput[_mesh.GetVertices().Length];
         }
 
         public void Render(RenderingContext renderingContext)
         {
-            for (int vid = 0; vid < _mesh.GetVertices().Length; ++vid)
-            {
-                int colorIndex = vid % 3;
-                float colorVal = 0.5f;
-                Vector4 color = new Vector4(colorIndex == 0 ? colorVal : 0f,
-                                            colorIndex == 1 ? colorVal : 0f,
-                                            colorIndex == 2 ? colorVal : 0f, 1f);
-
-                VertexInput vertInput = new VertexInput(_mesh.GetVertex(vid), new Vector3(), color, new Vector2(), new Vector2(), new Vector2(), new Vector2());
-                _fragVerticesCache[vid] = _shaderProgram.ComputeVertex(vertInput, renderingContext);
-            }
-
             for (int i = 0; i < _mesh.GetTriangles().Length; i++)
             {
                 Triangle triangle = _mesh.GetTriangles()[i];
 
-                FragmentInput fragInput0 = _fragVerticesCache[triangle.V0];
-                FragmentInput fragInput1 = _fragVerticesCache[triangle.V1];
-                FragmentInput fragInput2 = _fragVerticesCache[triangle.V2];
+                VertexInput vertInput0 = new VertexInput(_mesh.GetVertex(triangle.Vertex0.VertexIndex), _mesh.GetNormal(triangle.Vertex0.NormalIndex), new Vector4(0.8f, 0.0f, 0.0f, 1f), _mesh.GetTexCoord(triangle.Vertex0.TexCoordIndex), new Vector2(), new Vector2(), new Vector2());
+                VertexInput vertInput1 = new VertexInput(_mesh.GetVertex(triangle.Vertex1.VertexIndex), _mesh.GetNormal(triangle.Vertex1.NormalIndex), new Vector4(0.0f, 0.8f, 0.0f, 1f), _mesh.GetTexCoord(triangle.Vertex1.TexCoordIndex), new Vector2(), new Vector2(), new Vector2());
+                VertexInput vertInput2 = new VertexInput(_mesh.GetVertex(triangle.Vertex2.VertexIndex), _mesh.GetNormal(triangle.Vertex2.NormalIndex), new Vector4(0.0f, 0.0f, 0.8f, 1f), _mesh.GetTexCoord(triangle.Vertex2.TexCoordIndex), new Vector2(), new Vector2(), new Vector2());
+
+                FragmentInput fragInput0 = _shaderProgram.ComputeVertex(vertInput0, renderingContext);
+                FragmentInput fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
+                FragmentInput fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
 
                 Vector3 triangleNormalP = Vector3.Cross(
                     fragInput0.Position - fragInput1.Position,
