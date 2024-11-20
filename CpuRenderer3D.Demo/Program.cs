@@ -8,8 +8,8 @@ namespace CpuRenderer3D.Demo
         const int WindowWidth = 1024;
         const int WindowHeight = 768;
 
-        const int BufferWidth = WindowWidth * 2;
-        const int BufferHeight = WindowHeight * 2;
+        const int BufferWidth = WindowWidth * 1;
+        const int BufferHeight = WindowHeight * 1;
 
         static void Main(string[] args)
         {
@@ -18,7 +18,9 @@ namespace CpuRenderer3D.Demo
 
             List<Entity> entities = new List<Entity>();
 
-            IShaderProgram shaderProgram = new UnlitShaderProgram();
+            Buffer<Vector4> texture = BufferReader.ReadFromFile("Barrel_diffuse.png");
+
+            IShaderProgram shaderProgram = new UnlitShaderProgram(texture);
 
             foreach (string meshPath in args)
             {
@@ -32,7 +34,7 @@ namespace CpuRenderer3D.Demo
             NativeWindowSettings settings = NativeWindowSettings.Default;
             settings.ClientSize = new OpenTK.Mathematics.Vector2i(WindowWidth, WindowHeight);
 
-            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 1.2f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.5 * Math.PI), 0.1f, 20f);
+            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.5 * Math.PI), 0.1f, 20f);
 
             CpuRendererAdapter cpuRenderer = new CpuRendererAdapter(new CpuRenderer());
 
