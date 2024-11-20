@@ -14,6 +14,11 @@
       "commandName": "Project",
       "commandLineArgs": "RightTriangle.obj",
       "workingDirectory": "..\\TestData"
+    },
+    "CpuRenderer3D.Demo Everything": {
+      "commandName": "Project",
+      "commandLineArgs": "RustyBarrel.obj RightTriangle.obj Propeller.obj",
+      "workingDirectory": "..\\TestData"
     }
   }
 }

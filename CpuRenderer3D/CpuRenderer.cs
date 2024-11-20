@@ -4,7 +4,7 @@ namespace CpuRenderer3D
 {
     public class CpuRenderer
     {
-        public void Render(IReadOnlyList<Entity> entities, Camera camera, Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer)
+        public void Render(SceneNode scene, Camera camera, Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer)
         {
             RenderingContext renderingContext = new RenderingContext(
                 colorBuffer,
@@ -13,13 +13,18 @@ namespace CpuRenderer3D
                 viewProjection: camera.GetViewProjectionMatrix(),
                 projectionClip: Util.CreateProjectionClip(colorBuffer.Width, colorBuffer.Height));
 
-            foreach (Entity entity in entities)
-            {
-                renderingContext.SetModelWorld(entity.Transform.GetMatrix());
+            RenderRecursive(scene, renderingContext);
+        }
 
-                entity.MeshRenderer.Render(renderingContext);
-                entity.EdgeRenderer.Render(renderingContext);
-            }
+        public void RenderRecursive(SceneNode sceneNode, RenderingContext renderingContext)
+        {
+            renderingContext.SetModelWorld(sceneNode.GlobalTransform.GetMatrix());
+
+            foreach (IRenderer renderer in sceneNode.GetRenderers())
+                renderer.Render(renderingContext);
+
+            foreach (SceneNode child in sceneNode.GetChildren())
+                RenderRecursive(child, renderingContext);
         }
     }
 }

@@ -16,19 +16,30 @@ namespace CpuRenderer3D.Demo
             if (args.Length == 0)
                 return;
 
-            List<Entity> entities = new List<Entity>();
+            SceneNode scene = new SceneNode();
 
             Buffer<Vector4> texture = BufferReader.ReadFromFile("Barrel_diffuse.png");
 
-            IShaderProgram shaderProgram = new UnlitShaderProgram(texture);
+            //IShaderProgram shaderProgram = new UnlitShaderProgram(texture); // Use only for objects wit texture coords
+            IShaderProgram shaderProgram = new UnlitShaderProgram(Vector4.UnitZ);
 
+            int nodeIndex = 0;
             foreach (string meshPath in args)
             {
                 using (StreamReader streamReader = File.OpenText(meshPath))
                 {
+                    Transform transform = new Transform(new Vector3(5f * nodeIndex, 0f, 0f), EulerAngles.EulerToQuaternion(new Vector3(0f, 0f, 0.25f * nodeIndex * MathF.PI)));
+
                     Mesh mesh = ObjReader.Read(streamReader);
-                    entities.Add(new Entity(new Transform(), mesh, shaderProgram, shaderProgram));
+                    IRenderer[] renderers =
+                    [
+                        new MeshRenderer(mesh, shaderProgram),
+                        new ContourRenderer(mesh, shaderProgram),
+                    ];
+
+                    SceneNode meshNode = new SceneNode(transform, scene, renderers);
                 }
+                nodeIndex++;
             }
 
             NativeWindowSettings settings = NativeWindowSettings.Default;
@@ -36,15 +47,10 @@ namespace CpuRenderer3D.Demo
 
             Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.5 * Math.PI), 0.1f, 20f);
 
-            CpuRendererAdapter cpuRenderer = new CpuRendererAdapter(new CpuRenderer());
+            CpuRenderer cpuRenderer = new CpuRenderer();
 
-            RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, cpuRenderer, entities, camera);
+            RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, cpuRenderer, scene, camera);
             renderWindow.Run();
-
-            CpuRendererLegacy cpuRendererLegacy = new CpuRendererLegacy();
-
-            RenderWindow renderWindowLegacy = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, cpuRendererLegacy, entities, camera);
-            renderWindowLegacy.Run();
         }
     }
 }
