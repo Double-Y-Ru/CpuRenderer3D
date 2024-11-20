@@ -68,34 +68,34 @@ namespace CpuRenderer3D.Demo
                     {
                         if (lineParts.Length < 4) throw new ArgumentException($"Bad face compoment number in line {lineIndex}");
 
-                        string[] faceComponent0Str = lineParts[1].Split("/", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                        string[] faceComponent0Str = lineParts[1].Split("/", StringSplitOptions.TrimEntries);
                         if (faceComponent0Str.Length == 0) throw new ArgumentException($"Bad face component {0} indices number in line {lineIndex}");
 
                         int faceV0texCoordIndex = 0;
                         int faceV0NormalIndex = 0;
                         if (!int.TryParse(faceComponent0Str[0], Culture, out int faceV0vertexIndex)) throw new ArgumentException($"Bad face component {0} vertex index in line {lineIndex}");
-                        if (faceComponent0Str.Length > 1 && !int.TryParse(faceComponent0Str[1], Culture, out faceV0texCoordIndex)) throw new ArgumentException($"Bad face component {0} texure coord index in line {lineIndex}");
-                        if (faceComponent0Str.Length > 2 && !int.TryParse(faceComponent0Str[2], Culture, out faceV0NormalIndex)) throw new ArgumentException($"Bad face component {0} normal index in line {lineIndex}");
+                        if (faceComponent0Str.Length > 1 && !string.IsNullOrWhiteSpace(faceComponent0Str[1]) && !int.TryParse(faceComponent0Str[1], Culture, out faceV0texCoordIndex)) throw new ArgumentException($"Bad face component {0} texure coord index in line {lineIndex}");
+                        if (faceComponent0Str.Length > 2 && !string.IsNullOrWhiteSpace(faceComponent0Str[2]) && !int.TryParse(faceComponent0Str[2], Culture, out faceV0NormalIndex)) throw new ArgumentException($"Bad face component {0} normal index in line {lineIndex}");
                         FaceComponent faceComponent0 = new FaceComponent(faceV0vertexIndex, faceV0texCoordIndex, faceV0NormalIndex);
 
-                        string[] faceComponent1Str = lineParts[2].Split("/", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                        string[] faceComponent1Str = lineParts[2].Split("/", StringSplitOptions.TrimEntries);
                         if (faceComponent1Str.Length == 0) throw new ArgumentException($"Bad face component {1} indices number in line {lineIndex}");
 
                         int faceV1texCoordIndex = 0;
                         int faceV1NormalIndex = 0;
                         if (!int.TryParse(faceComponent1Str[0], Culture, out int faceV1vertexIndex)) throw new ArgumentException($"Bad face component {1} vertex index in line {lineIndex}");
-                        if (faceComponent1Str.Length > 1 && !int.TryParse(faceComponent1Str[1], Culture, out faceV1texCoordIndex)) throw new ArgumentException($"Bad face component {1} texure coord index in line {lineIndex}");
-                        if (faceComponent1Str.Length > 2 && !int.TryParse(faceComponent1Str[2], Culture, out faceV1NormalIndex)) throw new ArgumentException($"Bad face component {1} normal index in line {lineIndex}");
+                        if (faceComponent1Str.Length > 1 && !string.IsNullOrWhiteSpace(faceComponent1Str[1]) && !int.TryParse(faceComponent1Str[1], Culture, out faceV1texCoordIndex)) throw new ArgumentException($"Bad face component {1} texure coord index in line {lineIndex}");
+                        if (faceComponent1Str.Length > 2 && !string.IsNullOrWhiteSpace(faceComponent1Str[2]) && !int.TryParse(faceComponent1Str[2], Culture, out faceV1NormalIndex)) throw new ArgumentException($"Bad face component {1} normal index in line {lineIndex}");
                         FaceComponent faceComponent1 = new FaceComponent(faceV1vertexIndex, faceV1texCoordIndex, faceV1NormalIndex);
 
-                        string[] faceComponent2Str = lineParts[3].Split("/", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                        string[] faceComponent2Str = lineParts[3].Split("/", StringSplitOptions.TrimEntries);
                         if (faceComponent2Str.Length == 0) throw new ArgumentException($"Bad face component {2} indices number in line {lineIndex}");
 
                         int faceV2texCoordIndex = 0;
                         int faceV2NormalIndex = 0;
                         if (!int.TryParse(faceComponent2Str[0], Culture, out int faceV2vertexIndex)) throw new ArgumentException($"Bad face component {2} vertex index in line {lineIndex}");
-                        if (faceComponent2Str.Length > 1 && !int.TryParse(faceComponent2Str[1], Culture, out faceV2texCoordIndex)) throw new ArgumentException($"Bad face component {2} texure coord index in line {lineIndex}");
-                        if (faceComponent2Str.Length > 2 && !int.TryParse(faceComponent2Str[2], Culture, out faceV2NormalIndex)) throw new ArgumentException($"Bad face component {2} normal index in line {lineIndex}");
+                        if (faceComponent2Str.Length > 1 && !string.IsNullOrWhiteSpace(faceComponent2Str[1]) && !int.TryParse(faceComponent2Str[1], Culture, out faceV2texCoordIndex)) throw new ArgumentException($"Bad face component {2} texure coord index in line {lineIndex}");
+                        if (faceComponent2Str.Length > 2 && !string.IsNullOrWhiteSpace(faceComponent2Str[2]) && !int.TryParse(faceComponent2Str[2], Culture, out faceV2NormalIndex)) throw new ArgumentException($"Bad face component {2} normal index in line {lineIndex}");
                         FaceComponent faceComponent2 = new FaceComponent(faceV2vertexIndex, faceV2texCoordIndex, faceV2NormalIndex);
 
                         faces.Add(new Face(faceComponent0, faceComponent1, faceComponent2));
