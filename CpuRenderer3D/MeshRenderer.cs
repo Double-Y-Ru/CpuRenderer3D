@@ -2,12 +2,12 @@
 
 namespace CpuRenderer3D
 {
-    public class MeshRenderer : IRenderer
+    public class MeshRenderer<TFragmentData> : IRenderer where TFragmentData : struct
     {
         private readonly Mesh _mesh;
-        private readonly IShaderProgram _shaderProgram;
+        private readonly IShaderProgram<TFragmentData> _shaderProgram;
 
-        public MeshRenderer(Mesh mesh, IShaderProgram shaderProgram)
+        public MeshRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
@@ -23,9 +23,9 @@ namespace CpuRenderer3D
                 VertexInput vertInput1 = new VertexInput(_mesh.GetVertex(triangle.Vertex1.VertexIndex), _mesh.GetNormal(triangle.Vertex1.NormalIndex), Vector4.One, _mesh.GetTexCoord(triangle.Vertex1.TexCoordIndex), new Vector2(), new Vector2(), new Vector2());
                 VertexInput vertInput2 = new VertexInput(_mesh.GetVertex(triangle.Vertex2.VertexIndex), _mesh.GetNormal(triangle.Vertex2.NormalIndex), Vector4.One, _mesh.GetTexCoord(triangle.Vertex2.TexCoordIndex), new Vector2(), new Vector2(), new Vector2());
 
-                FragmentInput fragInput0 = _shaderProgram.ComputeVertex(vertInput0, renderingContext);
-                FragmentInput fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
-                FragmentInput fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
+                FragmentInput<TFragmentData> fragInput0 = _shaderProgram.ComputeVertex(vertInput0, renderingContext);
+                FragmentInput<TFragmentData> fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
+                FragmentInput<TFragmentData> fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
 
                 Vector3 triangleNormalP = Vector3.Cross(
                     fragInput0.Position - fragInput1.Position,

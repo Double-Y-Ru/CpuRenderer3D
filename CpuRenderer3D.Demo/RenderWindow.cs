@@ -81,8 +81,6 @@ namespace CpuRenderer3D.Demo
             using (BoundGlVertexArray boundVertexArray = _vertexArray.Bind())
             {
                 GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
-
-                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
                 GL.EnableVertexAttribArray(0);
 
                 int texCoordLocation = _shaderGl.GetAttribLocation("aTexCoord");

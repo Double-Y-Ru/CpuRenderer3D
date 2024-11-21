@@ -2,18 +2,18 @@
 
 namespace CpuRenderer3D
 {
-    public class EdgeRenderer : IRenderer
+    public class EdgeRenderer<TFragmentData> : IRenderer where TFragmentData : struct
     {
         private readonly Mesh _mesh;
-        private readonly IShaderProgram _shaderProgram;
+        private readonly IShaderProgram<TFragmentData> _shaderProgram;
 
-        private readonly FragmentInput[] _fragVerticesCache;
+        private readonly FragmentInput<TFragmentData>[] _fragVerticesCache;
 
-        public EdgeRenderer(Mesh mesh, IShaderProgram shaderProgram)
+        public EdgeRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
-            _fragVerticesCache = new FragmentInput[_mesh.GetVertices().Length];
+            _fragVerticesCache = new FragmentInput<TFragmentData>[_mesh.GetVertices().Length];
         }
 
         public void Render(RenderingContext renderingContext)
@@ -28,8 +28,8 @@ namespace CpuRenderer3D
             {
                 Edge edge = _mesh.GetEdges()[eid];
 
-                FragmentInput fragInput0 = _fragVerticesCache[edge.Vertex0Index];
-                FragmentInput fragInput1 = _fragVerticesCache[edge.Vertex1Index];
+                FragmentInput<TFragmentData> fragInput0 = _fragVerticesCache[edge.Vertex0Index];
+                FragmentInput<TFragmentData> fragInput1 = _fragVerticesCache[edge.Vertex1Index];
 
                 if (-1f < fragInput0.Position.X && fragInput0.Position.X < 1f
                  && -1f < fragInput0.Position.Y && fragInput0.Position.Y < 1f

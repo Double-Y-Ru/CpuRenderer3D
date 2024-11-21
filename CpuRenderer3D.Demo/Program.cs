@@ -20,8 +20,8 @@ namespace CpuRenderer3D.Demo
 
             Buffer<Vector4> texture = BufferReader.ReadFromFile("Barrel_diffuse.png");
 
-            //IShaderProgram shaderProgram = new UnlitShaderProgram(texture); // Use only for objects wit texture coords
-            IShaderProgram shaderProgram = new UnlitShaderProgram(Vector4.UnitZ);
+            //IShaderProgram<UnlitFragmentData> shaderProgram = new UnlitShaderProgram(texture); // Use only for objects wit texture coords
+            IShaderProgram<UnlitFragmentData> shaderProgram = new UnlitShaderProgram(Vector4.UnitZ);
 
             int nodeIndex = 0;
             foreach (string meshPath in args)
@@ -33,8 +33,8 @@ namespace CpuRenderer3D.Demo
                     Mesh mesh = ObjReader.Read(streamReader);
                     IRenderer[] renderers =
                     [
-                        new MeshRenderer(mesh, shaderProgram),
-                        new ContourRenderer(mesh, shaderProgram),
+                        new MeshRenderer<UnlitFragmentData>(mesh, shaderProgram),
+                        new ContourRenderer<UnlitFragmentData>(mesh, shaderProgram),
                     ];
 
                     SceneNode meshNode = new SceneNode(transform, scene, renderers);

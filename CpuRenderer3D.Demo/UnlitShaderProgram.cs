@@ -1,8 +1,8 @@
 ﻿using System.Numerics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Demo
 {
-    public class UnlitShaderProgram : IShaderProgram
+    public class UnlitShaderProgram : IShaderProgram<UnlitFragmentData>
     {
         public Buffer<Vector4> AlbedoTexture;
 
@@ -16,22 +16,21 @@ namespace CpuRenderer3D
             AlbedoTexture = albedoTexture;
         }
 
-        public FragmentInput ComputeVertex(VertexInput input, RenderingContext shaderContext)
+        public FragmentInput<UnlitFragmentData> ComputeVertex(VertexInput input, RenderingContext shaderContext)
         {
-            return new FragmentInput(
+            return new FragmentInput<UnlitFragmentData>(
                 Position: Vector4.Transform(input.Position, shaderContext.ModelProjection).XYZDivW(),
-                input.Normal,
-                input.Color,
-                input.UV0,
-                input.UV1,
-                input.UV2,
-                input.UV3);
+                Data: new UnlitFragmentData(input.Color, input.UV0));
         }
 
-        public Vector4 ComputeColor(FragmentInput input, RenderingContext shaderContext)
+        public Vector4 ComputeColor(FragmentInput<UnlitFragmentData> input, RenderingContext shaderContext)
         {
-            Vector4 sample = AlbedoTexture.Sample(input.UV0.X, input.UV0.Y);
-            return input.Color * sample;
+            return input.Data.Color * AlbedoTexture.Sample(input.Data.UV0.X, input.Data.UV0.Y);
         }
+
+        public FragmentInput<UnlitFragmentData> Add(FragmentInput<UnlitFragmentData> a, FragmentInput<UnlitFragmentData> b) => new FragmentInput<UnlitFragmentData>(a.Position + b.Position, a.Data + b.Data);
+        public FragmentInput<UnlitFragmentData> Subtract(FragmentInput<UnlitFragmentData> a, FragmentInput<UnlitFragmentData> b) => new FragmentInput<UnlitFragmentData>(a.Position - b.Position, a.Data - b.Data);
+        public FragmentInput<UnlitFragmentData> Multiply(FragmentInput<UnlitFragmentData> a, float f) => new FragmentInput<UnlitFragmentData>(a.Position * f, a.Data * f);
+        public FragmentInput<UnlitFragmentData> Divide(FragmentInput<UnlitFragmentData> a, float f) => new FragmentInput<UnlitFragmentData>(a.Position / f, a.Data / f);
     }
 }

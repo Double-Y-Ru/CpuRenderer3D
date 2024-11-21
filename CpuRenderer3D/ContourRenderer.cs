@@ -2,22 +2,22 @@
 
 namespace CpuRenderer3D
 {
-    public class ContourRenderer : IRenderer
+    public class ContourRenderer<TFragmentData> : IRenderer where TFragmentData : struct
     {
-        private record struct FragVertex(int TriangleId, FragmentInput FragInput);
+        private record struct FragVertex(int TriangleId, FragmentInput<TFragmentData> FragInput);
         private record struct TriangleVertexKey(int TriangleId, int VertexId);
 
         private readonly Mesh _mesh;
-        private readonly IShaderProgram _shaderProgram;
+        private readonly IShaderProgram<TFragmentData> _shaderProgram;
 
-        private readonly Dictionary<TriangleVertexKey, FragmentInput> _triangleVerticesCache;
+        private readonly Dictionary<TriangleVertexKey, FragmentInput<TFragmentData>> _triangleVerticesCache;
         private readonly Vector3[] _triangleNormals;
 
-        public ContourRenderer(Mesh mesh, IShaderProgram shaderProgram)
+        public ContourRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
-            _triangleVerticesCache = new Dictionary<TriangleVertexKey, FragmentInput>(_mesh.GetVertices().Length * 3);
+            _triangleVerticesCache = new Dictionary<TriangleVertexKey, FragmentInput<TFragmentData>>(_mesh.GetVertices().Length * 3);
             _triangleNormals = new Vector3[_mesh.GetTriangles().Length];
         }
 
@@ -31,9 +31,9 @@ namespace CpuRenderer3D
                 VertexInput vertInput1 = new VertexInput(_mesh.GetVertex(triangle.Vertex1.VertexIndex), _mesh.GetNormal(triangle.Vertex1.NormalIndex), new Vector4(0.0f, 0.8f, 0.0f, 1f), _mesh.GetTexCoord(triangle.Vertex1.TexCoordIndex), new Vector2(), new Vector2(), new Vector2());
                 VertexInput vertInput2 = new VertexInput(_mesh.GetVertex(triangle.Vertex2.VertexIndex), _mesh.GetNormal(triangle.Vertex2.NormalIndex), new Vector4(0.0f, 0.0f, 0.8f, 1f), _mesh.GetTexCoord(triangle.Vertex2.TexCoordIndex), new Vector2(), new Vector2(), new Vector2());
 
-                FragmentInput fragInput0 = _shaderProgram.ComputeVertex(vertInput0, renderingContext);
-                FragmentInput fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
-                FragmentInput fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
+                FragmentInput<TFragmentData> fragInput0 = _shaderProgram.ComputeVertex(vertInput0, renderingContext);
+                FragmentInput<TFragmentData> fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
+                FragmentInput<TFragmentData> fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
 
                 _triangleVerticesCache[new TriangleVertexKey(tid, triangle.Vertex0.VertexIndex)] = fragInput0;
                 _triangleVerticesCache[new TriangleVertexKey(tid, triangle.Vertex1.VertexIndex)] = fragInput1;
@@ -55,11 +55,11 @@ namespace CpuRenderer3D
                     if (!triangle0IsCameraFaced && !triangle1IsCameraFaced) continue;
                     if (triangle0IsCameraFaced == triangle1IsCameraFaced) continue;
 
-                    FragmentInput frag0vertInput0 = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
-                    FragmentInput frag0vertInput1 = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
+                    FragmentInput<TFragmentData> frag0vertInput0 = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
+                    FragmentInput<TFragmentData> frag0vertInput1 = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
 
-                    FragmentInput frag1vertInput0 = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[1], edge.Vertex0Index)];
-                    FragmentInput frag1vertInput1 = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[1], edge.Vertex1Index)];
+                    FragmentInput<TFragmentData> frag1vertInput0 = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[1], edge.Vertex0Index)];
+                    FragmentInput<TFragmentData> frag1vertInput1 = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[1], edge.Vertex1Index)];
 
                     if (frag0vertInput0 == frag1vertInput0 && frag0vertInput1 == frag1vertInput1)
                     {
@@ -75,8 +75,8 @@ namespace CpuRenderer3D
                 {
                     foreach (int triangleId in edge.Tris)
                     {
-                        FragmentInput fragInput0 = _triangleVerticesCache[new TriangleVertexKey(triangleId, edge.Vertex0Index)];
-                        FragmentInput fragInput1 = _triangleVerticesCache[new TriangleVertexKey(triangleId, edge.Vertex1Index)];
+                        FragmentInput<TFragmentData> fragInput0 = _triangleVerticesCache[new TriangleVertexKey(triangleId, edge.Vertex0Index)];
+                        FragmentInput<TFragmentData> fragInput1 = _triangleVerticesCache[new TriangleVertexKey(triangleId, edge.Vertex1Index)];
 
                         CheckAndDrawLine(renderingContext, fragInput0, fragInput1);
                     }
@@ -84,7 +84,7 @@ namespace CpuRenderer3D
             }
         }
 
-        private void CheckAndDrawLine(RenderingContext renderingContext, FragmentInput fragInput0, FragmentInput fragInput1)
+        private void CheckAndDrawLine(RenderingContext renderingContext, FragmentInput<TFragmentData> fragInput0, FragmentInput<TFragmentData> fragInput1)
         {
             if (-1f < fragInput0.Position.X && fragInput0.Position.X < 1f
              && -1f < fragInput0.Position.Y && fragInput0.Position.Y < 1f

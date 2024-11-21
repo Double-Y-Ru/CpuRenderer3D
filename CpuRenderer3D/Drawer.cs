@@ -4,7 +4,7 @@ namespace CpuRenderer3D
 {
     public static class Drawer
     {
-        public static void DrawTriangle(RenderingContext shaderContext, IShaderProgram shaderProgram, FragmentInput f0, FragmentInput f1, FragmentInput f2)
+        public static void DrawTriangle<TFragmentData>(RenderingContext shaderContext, IShaderProgram<TFragmentData> shaderProgram, FragmentInput<TFragmentData> f0, FragmentInput<TFragmentData> f1, FragmentInput<TFragmentData> f2) where TFragmentData : struct
         {
             if (f0.Position.Y == f1.Position.Y
              && f0.Position.Y == f2.Position.Y)
@@ -18,32 +18,32 @@ namespace CpuRenderer3D
             int rightY = (int)float.Round(f1.Position.Y);
             int upperY = (int)float.Round(f2.Position.Y);
 
-            FragmentInput leftFragInput = f0;
-            FragmentInput leftFragInputDelta = (f2 - f0) / (upperY - lowerY + 1);
+            FragmentInput<TFragmentData> leftFragInput = f0;
+            FragmentInput<TFragmentData> leftFragInputDelta = shaderProgram.Divide(shaderProgram.Subtract(f2, f0), upperY - lowerY + 1);
 
-            FragmentInput rightLowerFragInput = f0;
-            FragmentInput rightLowerFragInputDelta = (f1 - f0) / (rightY - lowerY + 1);
+            FragmentInput<TFragmentData> rightLowerFragInput = f0;
+            FragmentInput<TFragmentData> rightLowerFragInputDelta = shaderProgram.Divide(shaderProgram.Subtract(f1, f0), rightY - lowerY + 1);
 
-            FragmentInput rightUpperFragInput = f1;
-            FragmentInput rightUpperFragInputDelta = (f2 - f1) / (upperY - rightY + 1);
+            FragmentInput<TFragmentData> rightUpperFragInput = f1;
+            FragmentInput<TFragmentData> rightUpperFragInputDelta = shaderProgram.Divide(shaderProgram.Subtract(f2, f1), upperY - rightY + 1);
 
             for (int y = lowerY; y < rightY; ++y)
             {
                 DrawHorizontalLine(leftFragInput, rightLowerFragInput, y);
 
-                leftFragInput += leftFragInputDelta;
-                rightLowerFragInput += rightLowerFragInputDelta;
+                leftFragInput = shaderProgram.Add(leftFragInput, leftFragInputDelta);
+                rightLowerFragInput = shaderProgram.Add(rightLowerFragInput, rightLowerFragInputDelta);
             }
 
             for (int y = rightY; y <= upperY; ++y)
             {
                 DrawHorizontalLine(leftFragInput, rightUpperFragInput, y);
 
-                leftFragInput += leftFragInputDelta;
-                rightUpperFragInput += rightUpperFragInputDelta;
+                leftFragInput = shaderProgram.Add(leftFragInput, leftFragInputDelta);
+                rightUpperFragInput = shaderProgram.Add(rightUpperFragInput, rightUpperFragInputDelta);
             }
 
-            void DrawHorizontalLine(FragmentInput lineStart, FragmentInput lineEnd, int y)
+            void DrawHorizontalLine(FragmentInput<TFragmentData> lineStart, FragmentInput<TFragmentData> lineEnd, int y)
             {
                 if (lineStart.Position.X > lineEnd.Position.X)
                     Swap(ref lineStart, ref lineEnd);
@@ -51,8 +51,8 @@ namespace CpuRenderer3D
                 int lineStartX = (int)float.Round(lineStart.Position.X);
                 int lineEndX = (int)float.Round(lineEnd.Position.X);
 
-                FragmentInput fragInput = lineStart;
-                FragmentInput deltaFragInput = (lineEnd - lineStart) / (lineEndX - lineStartX + 1);
+                FragmentInput<TFragmentData> fragInput = lineStart;
+                FragmentInput<TFragmentData> fragInputDelta = shaderProgram.Divide(shaderProgram.Subtract(lineEnd, lineStart), lineEndX - lineStartX + 1);
 
                 for (int x = lineStartX; x <= lineEndX; x++)
                 {
@@ -64,12 +64,12 @@ namespace CpuRenderer3D
                         shaderContext.ColorBuffer.Set(x, y, pixelColor);
                     }
 
-                    fragInput += deltaFragInput;
+                    fragInput = shaderProgram.Add(fragInput, fragInputDelta);
                 }
             }
         }
 
-        public static void DrawLine(RenderingContext shaderContext, IShaderProgram shaderProgram, FragmentInput f0, FragmentInput f1)
+        public static void DrawLine<TFragmentData>(RenderingContext shaderContext, IShaderProgram<TFragmentData> shaderProgram, FragmentInput<TFragmentData> f0, FragmentInput<TFragmentData> f1) where TFragmentData : struct
         {
             bool isGentle = true;
 
@@ -98,8 +98,8 @@ namespace CpuRenderer3D
             int width = gentleRightX - gentleLeftX;
             int height = gentleRightY - gentleLeftY;
 
-            FragmentInput fragInput = f0;
-            FragmentInput fragInputDelta = (f1 - f0) / width;
+            FragmentInput<TFragmentData> fragInput = f0;
+            FragmentInput<TFragmentData> fragInputDelta = shaderProgram.Divide(shaderProgram.Subtract(f1, f0), width);
 
             int derror2 = Math.Abs(height) * 2;
             int error2 = 0;
@@ -133,9 +133,8 @@ namespace CpuRenderer3D
                     error2 -= width * 2;
                 }
 
-                fragInput += fragInputDelta;
+                fragInput = shaderProgram.Add(fragInput, fragInputDelta);
             }
-
         }
 
         private static void Swap<T>(ref T a, ref T b)
