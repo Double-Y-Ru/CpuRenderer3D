@@ -10,7 +10,7 @@ namespace CpuRenderer3D.Demo
 {
     public class RenderWindow : GameWindow
     {
-        private readonly CpuRenderer _cpuRenderer;
+        private readonly Engine _engine;
         private readonly SceneNode _scene;
         private readonly Camera _camera;
         private readonly Buffer<Vector4> _colorBuffer;
@@ -42,10 +42,10 @@ namespace CpuRenderer3D.Demo
         private Stopwatch _stopWatch;
 
         public RenderWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, int bufferWidth, int bufferHeight,
-            CpuRenderer cpuRenderer, SceneNode scene, Camera camera)
+            Engine engine, SceneNode scene, Camera camera)
             : base(gameWindowSettings, nativeWindowSettings)
         {
-            _cpuRenderer = cpuRenderer;
+            _engine = engine;
             _scene = scene;
             _camera = camera;
             _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, default);
@@ -121,7 +121,7 @@ namespace CpuRenderer3D.Demo
             _stopWatch.Reset();
             _stopWatch.Start();
 
-            _cpuRenderer.Render(_scene, _camera, _colorBuffer, _depthBuffer);
+            _engine.Render(_scene, _camera, _colorBuffer, _depthBuffer);
 
             _stopWatch.Stop();
 

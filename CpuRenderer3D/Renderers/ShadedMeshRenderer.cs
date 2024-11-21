@@ -1,13 +1,13 @@
 ﻿using System.Numerics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Renderers
 {
-    public class MeshRenderer<TFragmentData> : IRenderer where TFragmentData : struct
+    public class ShadedMeshRenderer<TFragmentData> : IRenderer where TFragmentData : struct
     {
         private readonly Mesh _mesh;
         private readonly IShaderProgram<TFragmentData> _shaderProgram;
 
-        public MeshRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram)
+        public ShadedMeshRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
@@ -48,7 +48,7 @@ namespace CpuRenderer3D
                     fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ProjectionClip);
                     fragInput2.Position = Vector3.Transform(fragInput2.Position, renderingContext.ProjectionClip);
 
-                    Drawer.DrawTriangle(renderingContext, _shaderProgram, fragInput0, fragInput1, fragInput2);
+                    Drawer.DrawTriangle(renderingContext, fragInput0, fragInput1, fragInput2, _shaderProgram);
                 }
             }
         }

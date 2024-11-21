@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace CpuRenderer3D
+namespace CpuRenderer3D.Renderers
 {
     public class ContourRenderer<TFragmentData> : IRenderer where TFragmentData : struct
     {
@@ -96,7 +96,7 @@ namespace CpuRenderer3D
                 fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
                 fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
 
-                Drawer.DrawLine(renderingContext, _shaderProgram, fragInput0, fragInput1);
+                Drawer.DrawLine(renderingContext, fragInput0, fragInput1, _shaderProgram);
             }
         }
     }

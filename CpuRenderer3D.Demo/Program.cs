@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using CpuRenderer3D.Renderers;
 using OpenTK.Windowing.Desktop;
 
 namespace CpuRenderer3D.Demo
@@ -33,7 +34,7 @@ namespace CpuRenderer3D.Demo
                     Mesh mesh = ObjReader.Read(streamReader);
                     IRenderer[] renderers =
                     [
-                        new MeshRenderer<UnlitFragmentData>(mesh, shaderProgram),
+                        new ShadedMeshRenderer<UnlitFragmentData>(mesh, shaderProgram),
                         new ContourRenderer<UnlitFragmentData>(mesh, shaderProgram),
                     ];
 
@@ -47,9 +48,9 @@ namespace CpuRenderer3D.Demo
 
             Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.5 * Math.PI), 0.1f, 20f);
 
-            CpuRenderer cpuRenderer = new CpuRenderer();
+            Engine engine = new Engine();
 
-            RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, cpuRenderer, scene, camera);
+            RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, engine, scene, camera);
             renderWindow.Run();
         }
     }
