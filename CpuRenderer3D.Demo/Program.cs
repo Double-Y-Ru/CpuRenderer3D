@@ -19,10 +19,13 @@ namespace CpuRenderer3D.Demo
 
             SceneNode scene = new SceneNode();
 
-            Buffer<Vector4> texture = BufferReader.ReadFromFile("Barrel_diffuse.png");
+            Buffer<Vector4> texture = BufferReader.ReadFromFile("african_head_diffuse.png");
 
-            //IShaderProgram<UnlitFragmentData> shaderProgram = new UnlitShaderProgram(texture); // Use only for objects wit texture coords
-            IShaderProgram<UnlitFragmentData> shaderProgram = new UnlitShaderProgram(Vector4.UnitZ);
+            Vector4 ambientColor = new Vector4(0.5f, 0.6f, 0.7f, 1f);
+
+            IShaderProgram<UnlitFragmentData> unlitTextureShader = new UnlitShaderProgram(texture);
+            IShaderProgram<UnlitFragmentData> litTextureShader = new LitShaderProgram(texture, ambientColor);
+            IShaderProgram<UnlitFragmentData> litColorShader = new LitShaderProgram(Vector4.One, ambientColor);
 
             int nodeIndex = 0;
             foreach (string meshPath in args)
@@ -34,7 +37,7 @@ namespace CpuRenderer3D.Demo
                     Mesh mesh = ObjReader.Read(streamReader);
                     IRenderer[] renderers =
                     [
-                        new ColoredEdgesMeshRenderer(mesh, Vector4.UnitZ, Vector4.One)
+                        new ShadedMeshRenderer<UnlitFragmentData>(mesh, litColorShader),
                     ];
 
                     SceneNode meshNode = new SceneNode(transform, scene, renderers);
@@ -45,7 +48,7 @@ namespace CpuRenderer3D.Demo
             NativeWindowSettings settings = NativeWindowSettings.Default;
             settings.ClientSize = new OpenTK.Mathematics.Vector2i(WindowWidth, WindowHeight);
 
-            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.5 * Math.PI), 0.1f, 20f);
+            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.25 * Math.PI), 0.1f, 100f);
 
             Engine engine = new Engine();
 
