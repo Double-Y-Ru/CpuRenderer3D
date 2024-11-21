@@ -59,6 +59,45 @@ namespace CpuRenderer3D
             }
         }
 
+        public static Mesh GetMeshWithCalculatedNormals(Mesh mesh)
+        {
+            CalculateNormals(mesh._vertices, mesh._triangles, out Vector3[] normals, out Triangle[] triangles);
+
+            return new Mesh(mesh._vertices, normals, mesh._texCoords, triangles, mesh._edges);
+        }
+
+        public static void CalculateNormals(Vector3[] vertices, Triangle[] oldTriangles, out Vector3[] normals, out Triangle[] newTriangles)
+        {
+            normals = new Vector3[oldTriangles.Length * 3];
+            newTriangles = new Triangle[oldTriangles.Length];
+
+            for (int tid = 0; tid < oldTriangles.Length; tid++)
+            {
+                Triangle triangle = oldTriangles[tid];
+
+                Vector3 triangleVertex0Local = vertices[triangle.Vertex0.VertexIndex];
+                Vector3 triangleVertex1Local = vertices[triangle.Vertex1.VertexIndex];
+                Vector3 triangleVertex2Local = vertices[triangle.Vertex2.VertexIndex];
+
+                Vector3 triangleNormal = Vector3.Cross(
+                    triangleVertex0Local - triangleVertex1Local,
+                    triangleVertex0Local - triangleVertex2Local);
+
+                int vertexNormal0Index = 3 * tid + 0;
+                int vertexNormal1Index = 3 * tid + 1;
+                int vertexNormal2Index = 3 * tid + 2;
+
+                normals[vertexNormal0Index] = triangleNormal;
+                normals[vertexNormal1Index] = triangleNormal;
+                normals[vertexNormal2Index] = triangleNormal;
+
+                newTriangles[tid] = new Triangle(
+                    new TriangleVertex(triangle.Vertex0.VertexIndex, vertexNormal0Index, triangle.Vertex0.TexCoordIndex),
+                    new TriangleVertex(triangle.Vertex1.VertexIndex, vertexNormal1Index, triangle.Vertex1.TexCoordIndex),
+                    new TriangleVertex(triangle.Vertex2.VertexIndex, vertexNormal2Index, triangle.Vertex2.TexCoordIndex));
+            }
+        }
+
         public readonly record struct EdgeKey
         {
             public readonly int Vertex0Index;
