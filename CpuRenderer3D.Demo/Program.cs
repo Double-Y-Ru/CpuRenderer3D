@@ -34,8 +34,7 @@ namespace CpuRenderer3D.Demo
                     Mesh mesh = ObjReader.Read(streamReader);
                     IRenderer[] renderers =
                     [
-                        new ShadedMeshRenderer<UnlitFragmentData>(mesh, shaderProgram),
-                        new ContourRenderer<UnlitFragmentData>(mesh, shaderProgram),
+                        new ColoredEdgesMeshRenderer(mesh, Vector4.UnitZ, Vector4.One)
                     ];
 
                     SceneNode meshNode = new SceneNode(transform, scene, renderers);
