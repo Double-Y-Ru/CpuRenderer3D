@@ -1,4 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Numerics;
 
 namespace CpuRenderer3D
@@ -98,7 +101,7 @@ namespace CpuRenderer3D
             }
         }
 
-        public readonly record struct EdgeKey
+        private readonly struct EdgeKey
         {
             public readonly int Vertex0Index;
             public readonly int Vertex1Index;

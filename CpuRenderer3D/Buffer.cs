@@ -1,4 +1,6 @@
-﻿namespace CpuRenderer3D
+﻿using System;
+
+namespace CpuRenderer3D
 {
     public class Buffer<T>
     {
@@ -75,8 +77,8 @@
             u = Math.Clamp(u, 0f, 1f);
             v = Math.Clamp(v, 0f, 1f);
 
-            int x = (int)float.Round(u * (Width - 1));
-            int y = Height - 1 - (int)float.Round(v * (Height - 1));
+            int x = (int)MathF.Round(u * (Width - 1));
+            int y = Height - 1 - (int)MathF.Round(v * (Height - 1));
 
             return Get(x, y);
         }

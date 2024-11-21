@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace CpuRenderer3D
 {
@@ -14,9 +15,9 @@ namespace CpuRenderer3D
             if (f0.Y > f2.Y) Swap(ref f0, ref f2);
             if (f1.Y > f2.Y) Swap(ref f1, ref f2);
 
-            int lowerY = (int)float.Round(f0.Y);
-            int rightY = (int)float.Round(f1.Y);
-            int upperY = (int)float.Round(f2.Y);
+            int lowerY = (int)MathF.Round(f0.Y);
+            int rightY = (int)MathF.Round(f1.Y);
+            int upperY = (int)MathF.Round(f2.Y);
 
             Vector3 leftPoint = f0;
             Vector3 leftPointDelta = (f2 - f0) / (upperY - lowerY + 1);
@@ -48,8 +49,8 @@ namespace CpuRenderer3D
                 if (lineStart.X > lineEnd.X)
                     Swap(ref lineStart, ref lineEnd);
 
-                int lineStartX = (int)float.Round(lineStart.X);
-                int lineEndX = (int)float.Round(lineEnd.X);
+                int lineStartX = (int)MathF.Round(lineStart.X);
+                int lineEndX = (int)MathF.Round(lineEnd.X);
 
                 Vector3 point = lineStart;
                 Vector3 pointDelta = (lineEnd - lineStart) / (lineEndX - lineStartX + 1);
@@ -77,9 +78,9 @@ namespace CpuRenderer3D
             if (f0.Position.Y > f2.Position.Y) Swap(ref f0, ref f2);
             if (f1.Position.Y > f2.Position.Y) Swap(ref f1, ref f2);
 
-            int lowerY = (int)float.Round(f0.Position.Y);
-            int rightY = (int)float.Round(f1.Position.Y);
-            int upperY = (int)float.Round(f2.Position.Y);
+            int lowerY = (int)MathF.Round(f0.Position.Y);
+            int rightY = (int)MathF.Round(f1.Position.Y);
+            int upperY = (int)MathF.Round(f2.Position.Y);
 
             FragmentInput<TFragmentData> leftFragInput = f0;
             FragmentInput<TFragmentData> leftFragInputDelta = shaderProgram.Divide(shaderProgram.Subtract(f2, f0), upperY - lowerY + 1);
@@ -111,8 +112,8 @@ namespace CpuRenderer3D
                 if (lineStart.Position.X > lineEnd.Position.X)
                     Swap(ref lineStart, ref lineEnd);
 
-                int lineStartX = (int)float.Round(lineStart.Position.X);
-                int lineEndX = (int)float.Round(lineEnd.Position.X);
+                int lineStartX = (int)MathF.Round(lineStart.Position.X);
+                int lineEndX = (int)MathF.Round(lineEnd.Position.X);
 
                 FragmentInput<TFragmentData> fragInput = lineStart;
                 FragmentInput<TFragmentData> fragInputDelta = shaderProgram.Divide(shaderProgram.Subtract(lineEnd, lineStart), lineEndX - lineStartX + 1);
@@ -149,11 +150,11 @@ namespace CpuRenderer3D
                 Swap(ref f0, ref f1);
             }
 
-            int gentleLeftX = (int)float.Round(f0.X);
-            int gentleLeftY = (int)float.Round(f0.Y);
+            int gentleLeftX = (int)MathF.Round(f0.X);
+            int gentleLeftY = (int)MathF.Round(f0.Y);
 
-            int gentleRightX = (int)float.Round(f1.X);
-            int gentleRightY = (int)float.Round(f1.Y);
+            int gentleRightX = (int)MathF.Round(f1.X);
+            int gentleRightY = (int)MathF.Round(f1.Y);
 
             int width = gentleRightX - gentleLeftX;
             int height = gentleRightY - gentleLeftY;
@@ -215,11 +216,11 @@ namespace CpuRenderer3D
                 Swap(ref f0, ref f1);
             }
 
-            int gentleLeftX = (int)float.Round(f0.Position.X);
-            int gentleLeftY = (int)float.Round(f0.Position.Y);
+            int gentleLeftX = (int)MathF.Round(f0.Position.X);
+            int gentleLeftY = (int)MathF.Round(f0.Position.Y);
 
-            int gentleRightX = (int)float.Round(f1.Position.X);
-            int gentleRightY = (int)float.Round(f1.Position.Y);
+            int gentleRightX = (int)MathF.Round(f1.Position.X);
+            int gentleRightY = (int)MathF.Round(f1.Position.Y);
 
             int width = gentleRightX - gentleLeftX;
             int height = gentleRightY - gentleLeftY;
