@@ -42,13 +42,13 @@ namespace CpuRenderer3D.Demo
         private Stopwatch _stopWatch;
 
         public RenderWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, int bufferWidth, int bufferHeight,
-            Engine engine, SceneNode scene, Camera camera)
+            Engine engine, SceneNode scene, Camera camera, Vector4 backgroundColor)
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _engine = engine;
             _scene = scene;
             _camera = camera;
-            _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, default);
+            _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, backgroundColor);
             _depthBuffer = new Buffer<float>(bufferWidth, bufferHeight, 1f);
 
             _texture = new GlTexture();

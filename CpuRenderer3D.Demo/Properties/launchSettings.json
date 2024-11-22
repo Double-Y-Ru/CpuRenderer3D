@@ -1,5 +1,10 @@
 {
   "profiles": {
+    "Demo": {
+      "commandName": "Project",
+      "commandLineArgs": "",
+      "workingDirectory": "..\\TestData"
+    },
     "Demo Triangle": {
       "commandName": "Project",
       "commandLineArgs": "RightTriangle.obj",

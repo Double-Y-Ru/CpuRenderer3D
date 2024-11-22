@@ -14,32 +14,50 @@ namespace CpuRenderer3D.Demo
 
         static void Main(string[] args)
         {
-            if (args.Length == 0)
-                return;
+            Vector4 ambientColor = new Vector4(0.5f, 0.6f, 0.7f, 1f);
+
+            IShaderProgram<UnlitFragmentData> litColorShader = new LitShaderProgram(Vector4.One, ambientColor);
 
             SceneNode scene = new SceneNode();
 
-            Buffer<Vector4> texture = BufferReader.ReadFromFile("african_head_diffuse.png");
-
-            Vector4 ambientColor = new Vector4(0.5f, 0.6f, 0.7f, 1f);
-
-            IShaderProgram<UnlitFragmentData> unlitTextureShader = new UnlitShaderProgram(texture);
-            IShaderProgram<UnlitFragmentData> litTextureShader = new LitShaderProgram(texture, ambientColor);
-            IShaderProgram<UnlitFragmentData> litColorShader = new LitShaderProgram(Vector4.One, ambientColor);
-
-            int nodeIndex = 0;
-            foreach (string meshPath in args)
+            if (args.Length == 0)
             {
-                Transform transform = new Transform(new Vector3(5f * nodeIndex, 0f, 0f), EulerAngles.EulerToQuaternion(new Vector3(0f, 0f, 0.25f * nodeIndex * MathF.PI)));
+                // default scene
 
-                Mesh mesh = ObjReader.ReadFromFile(meshPath, calculateNormals: true);
-                IRenderer[] renderers =
-                [
-                    new ShadedMeshRenderer<UnlitFragmentData>(mesh, litColorShader),
-                ];
+                Buffer<Vector4> headTexture = BufferReader.ReadFromFile("african_head_diffuse.png");
+                IShaderProgram<UnlitFragmentData> litHeadTextureShader = new LitShaderProgram(headTexture, ambientColor);
+                Mesh headMesh = ObjReader.ReadFromFile("african_head.obj", calculateNormals: false);
+                Transform headTransform = new Transform(Vector3.Zero, Quaternion.Identity);
+                SceneNode head = new SceneNode(headTransform, scene, [new ShadedMeshRenderer<UnlitFragmentData>(headMesh, litHeadTextureShader)]);
 
-                SceneNode meshNode = new SceneNode(transform, scene, renderers);
-                nodeIndex++;
+                Buffer<Vector4> barrelTexture = BufferReader.ReadFromFile("Barrel_diffuse.png");
+                IShaderProgram<UnlitFragmentData> litBarrelTextureShader = new LitShaderProgram(barrelTexture, ambientColor);
+                Mesh barrelMesh = ObjReader.ReadFromFile("RustyBarrel.obj", calculateNormals: true);
+                Transform barrelTransform = new Transform(new Vector3(2f, 0f, 0f), Quaternion.Identity);
+                SceneNode barrel = new SceneNode(barrelTransform, scene, [new ShadedMeshRenderer<UnlitFragmentData>(barrelMesh, litBarrelTextureShader)]);
+
+                IShaderProgram<UnlitFragmentData> unlitColorShader = new UnlitShaderProgram(Vector4.One);
+                Mesh quadMesh = ObjReader.ReadFromFile("Quad.obj", calculateNormals: true);
+                Transform quadTransform = new Transform(new Vector3(0f, -1.1f, 0f), EulerAngles.EulerToQuaternion(0.25f * MathF.PI, -0.5f * MathF.PI, 0f));
+                SceneNode quad = new SceneNode(quadTransform, scene, [new ShadedMeshRenderer<UnlitFragmentData>(quadMesh, unlitColorShader)]);
+            }
+            else
+            {
+                // Autogenerate scene
+                int nodeIndex = 0;
+                foreach (string meshPath in args)
+                {
+                    Transform transform = new Transform(new Vector3(5f * nodeIndex, 0f, 0f), EulerAngles.EulerToQuaternion(new Vector3(0f, 0f, 0.25f * nodeIndex * MathF.PI)));
+
+                    Mesh mesh = ObjReader.ReadFromFile(meshPath, calculateNormals: true);
+                    IRenderer[] renderers =
+                    [
+                        new ShadedMeshRenderer<UnlitFragmentData>(mesh, litColorShader),
+                    ];
+
+                    SceneNode meshNode = new SceneNode(transform, scene, renderers);
+                    nodeIndex++;
+                }
             }
 
             NativeWindowSettings settings = NativeWindowSettings.Default;
@@ -49,7 +67,7 @@ namespace CpuRenderer3D.Demo
 
             Engine engine = new Engine();
 
-            RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, engine, scene, camera);
+            RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, engine, scene, camera, ambientColor);
             renderWindow.Run();
         }
     }
