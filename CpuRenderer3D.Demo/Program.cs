@@ -66,9 +66,7 @@ namespace CpuRenderer3D.Demo
 
             Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), EulerAngles.EulerToQuaternion(0f, 0.1f * MathF.PI, 0f)), (float)BufferWidth / BufferHeight, (float)(0.25 * Math.PI), 0.1f, 100f);
 
-            Engine engine = new Engine();
-
-            RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, engine, scene, camera, ambientColor);
+            RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, scene, camera, ambientColor);
             renderWindow.Run();
         }
     }

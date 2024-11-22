@@ -13,8 +13,10 @@ namespace CpuRenderer3D.Demo
         private readonly Engine _engine;
         private readonly SceneNode _scene;
         private readonly Camera _camera;
+
         private readonly Buffer<Vector4> _colorBuffer;
         private readonly Buffer<float> _depthBuffer;
+        private readonly Buffer<int> _dataBuffer;
 
         private readonly float[] _vertices =
         {
@@ -42,14 +44,14 @@ namespace CpuRenderer3D.Demo
         private Stopwatch _stopWatch;
 
         public RenderWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings, int bufferWidth, int bufferHeight,
-            Engine engine, SceneNode scene, Camera camera, Vector4 backgroundColor)
+            SceneNode scene, Camera camera, Vector4 backgroundColor)
             : base(gameWindowSettings, nativeWindowSettings)
         {
-            _engine = engine;
             _scene = scene;
             _camera = camera;
             _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, backgroundColor);
             _depthBuffer = new Buffer<float>(bufferWidth, bufferHeight, 1f);
+            _dataBuffer = new Buffer<int>(bufferWidth, bufferHeight, 0);
 
             _texture = new GlTexture();
             _vertexBuffer = new GlBuffer();
@@ -121,7 +123,7 @@ namespace CpuRenderer3D.Demo
             _stopWatch.Reset();
             _stopWatch.Start();
 
-            _engine.Render(_scene, _camera, _colorBuffer, _depthBuffer);
+            Engine.Render(_scene, _camera, _colorBuffer, _depthBuffer, _dataBuffer);
 
             _stopWatch.Stop();
 
