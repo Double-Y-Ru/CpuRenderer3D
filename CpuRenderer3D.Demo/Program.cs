@@ -29,18 +29,18 @@ namespace CpuRenderer3D.Demo
                 IShaderProgram<LitFragmentData> litHeadTextureShader = new LitShaderProgram(headTexture, ambientColor);
                 Mesh headMesh = ObjReader.ReadFromFile("african_head.obj", calculateNormals: false);
                 Transform headTransform = new Transform(Vector3.Zero, Quaternion.Identity);
-                SceneNode head = new SceneNode(headTransform, scene, [new ShadedMeshRenderer<LitFragmentData>(headMesh, litHeadTextureShader)]);
+                scene.AddChild(new SceneNode(headTransform, [new ShadedMeshRenderer<LitFragmentData>(headMesh, litHeadTextureShader)]));
 
                 Buffer<Vector4> barrelTexture = BufferReader.ReadFromFile("Barrel_diffuse.png");
                 IShaderProgram<LitFragmentData> litBarrelTextureShader = new LitShaderProgram(barrelTexture, ambientColor);
                 Mesh barrelMesh = ObjReader.ReadFromFile("RustyBarrel.obj", calculateNormals: true);
                 Transform barrelTransform = new Transform(new Vector3(2f, 0f, 0f), Quaternion.Identity);
-                SceneNode barrel = new SceneNode(barrelTransform, scene, [new ShadedMeshRenderer<LitFragmentData>(barrelMesh, litBarrelTextureShader)]);
+                scene.AddChild(new SceneNode(barrelTransform, [new ShadedMeshRenderer<LitFragmentData>(barrelMesh, litBarrelTextureShader)]));
 
                 IShaderProgram<UnlitFragmentData> unlitColorShader = new UnlitShaderProgram(Vector4.One);
                 Mesh quadMesh = ObjReader.ReadFromFile("Quad.obj", calculateNormals: true);
                 Transform quadTransform = new Transform(new Vector3(0f, -1.1f, 0f), EulerAngles.EulerToQuaternion(0.25f * MathF.PI, -0.5f * MathF.PI, 0f));
-                SceneNode quad = new SceneNode(quadTransform, scene, [new ShadedMeshRenderer<UnlitFragmentData>(quadMesh, unlitColorShader)]);
+                scene.AddChild(new SceneNode(quadTransform, [new ShadedMeshRenderer<UnlitFragmentData>(quadMesh, unlitColorShader)]));
             }
             else
             {
@@ -56,7 +56,7 @@ namespace CpuRenderer3D.Demo
                         new ShadedMeshRenderer<LitFragmentData>(mesh, litColorShader),
                     ];
 
-                    SceneNode meshNode = new SceneNode(transform, scene, renderers);
+                    scene.AddChild(new SceneNode(transform, renderers));
                     nodeIndex++;
                 }
             }

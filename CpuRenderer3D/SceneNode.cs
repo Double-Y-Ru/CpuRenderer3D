@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -8,7 +9,7 @@ namespace CpuRenderer3D
     {
         private Transform _localTransform;
 
-        private readonly SceneNode? _parent;
+        private SceneNode? _parent;
         private readonly List<SceneNode> _children;
 
         private readonly IRenderer[] _renderers;
@@ -37,18 +38,26 @@ namespace CpuRenderer3D
             _renderers = new IRenderer[0];
         }
 
-        public SceneNode(Transform localTransform, SceneNode parent, IEnumerable<IRenderer> renderers)
+        public SceneNode(Transform localTransform, IEnumerable<IRenderer> renderers)
         {
-            _parent = parent;
+            _parent = null;
             _children = new List<SceneNode>();
             _localTransform = localTransform;
             _renderers = renderers.ToArray();
-            _parent.AddChild(this);
         }
 
-        private void AddChild(SceneNode child)
+        public void AddChild(SceneNode child)
         {
+            if (child.Parent != null)
+                throw new NotSupportedException("Child already has its parent. Reparenting is not supported");
+
+            child.SetParent(this);
             _children.Add(child);
+        }
+
+        private void SetParent(SceneNode newParent)
+        {
+            _parent = newParent;
         }
 
         public IEnumerable<SceneNode> GetChildren() => _children;
