@@ -2,17 +2,15 @@
 
 namespace CpuRenderer3D.Renderers
 {
-    public class ColoredEdgesMeshRenderer : IRenderer
+    public class ColoredMeshRenderer : IRenderer
     {
         private readonly Mesh _mesh;
         private readonly Vector4 _fillColor;
-        private readonly Vector4 _edgeColor;
 
-        public ColoredEdgesMeshRenderer(Mesh mesh, Vector4 fillColor, Vector4 edgeColor)
+        public ColoredMeshRenderer(Mesh mesh, Vector4 fillColor)
         {
             _mesh = mesh;
             _fillColor = fillColor;
-            _edgeColor = edgeColor;
         }
 
         public void Render(RenderingContext renderingContext)
@@ -51,14 +49,6 @@ namespace CpuRenderer3D.Renderers
                     triangleVertex2Proj = Vector3.Transform(triangleVertex2Proj, renderingContext.ProjectionClip);
 
                     Drawer.DrawTriangle(triangleVertex0Proj, triangleVertex1Proj, triangleVertex2Proj, _fillColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
-
-                    triangleVertex0Proj -= 0.0001f * Vector3.UnitZ;
-                    triangleVertex1Proj -= 0.0001f * Vector3.UnitZ;
-                    triangleVertex2Proj -= 0.0001f * Vector3.UnitZ;
-
-                    Drawer.DrawLine(triangleVertex0Proj, triangleVertex1Proj, _edgeColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
-                    Drawer.DrawLine(triangleVertex1Proj, triangleVertex2Proj, _edgeColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
-                    Drawer.DrawLine(triangleVertex2Proj, triangleVertex0Proj, _edgeColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
                 }
             }
         }

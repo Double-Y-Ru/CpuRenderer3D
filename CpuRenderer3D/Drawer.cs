@@ -5,7 +5,7 @@ namespace CpuRenderer3D
 {
     public static class Drawer
     {
-        public static void DrawTriangle(RenderingContext context, Vector3 f0, Vector3 f1, Vector3 f2, Vector4 color)
+        public static void DrawTriangle<T>(Vector3 f0, Vector3 f1, Vector3 f2, T color, Buffer<T> colorBuffer, Buffer<float> depthBuffer)
         {
             if (f0.Y == f1.Y
              && f0.Y == f2.Y)
@@ -57,10 +57,10 @@ namespace CpuRenderer3D
 
                 for (int x = lineStartX; x <= lineEndX; x++)
                 {
-                    if (context.DepthBuffer.TryGet(x, y, out float zFromBuffer) && point.Z <= zFromBuffer)
+                    if (depthBuffer.TryGet(x, y, out float zFromBuffer) && point.Z <= zFromBuffer)
                     {
-                        context.DepthBuffer.Set(x, y, point.Z);
-                        context.ColorBuffer.Set(x, y, color);
+                        depthBuffer.Set(x, y, point.Z);
+                        colorBuffer.Set(x, y, color);
                     }
 
                     point = point + pointDelta;
@@ -133,7 +133,7 @@ namespace CpuRenderer3D
             }
         }
 
-        public static void DrawLine(RenderingContext context, Vector3 f0, Vector3 f1, Vector4 color)
+        public static void DrawLine<T>(Vector3 f0, Vector3 f1, T color, Buffer<T> colorBuffer, Buffer<float> depthBuffer)
         {
             bool isGentle = true;
 
@@ -170,18 +170,18 @@ namespace CpuRenderer3D
             {
                 if (isGentle)
                 {
-                    if (context.DepthBuffer.TryGet(x, y, out float zFromBuffer) && z <= zFromBuffer)
+                    if (depthBuffer.TryGet(x, y, out float zFromBuffer) && z <= zFromBuffer)
                     {
-                        context.DepthBuffer.Set(x, y, z);
-                        context.ColorBuffer.Set(x, y, color);
+                        depthBuffer.Set(x, y, z);
+                        colorBuffer.Set(x, y, color);
                     }
                 }
                 else
                 {
-                    if (context.DepthBuffer.TryGet(y, x, out float zFromBuffer) && z <= zFromBuffer)
+                    if (depthBuffer.TryGet(y, x, out float zFromBuffer) && z <= zFromBuffer)
                     {
-                        context.DepthBuffer.Set(y, x, z);
-                        context.ColorBuffer.Set(y, x, color);
+                        depthBuffer.Set(y, x, z);
+                        colorBuffer.Set(y, x, color);
                     }
                 }
                 error2 += derror2;

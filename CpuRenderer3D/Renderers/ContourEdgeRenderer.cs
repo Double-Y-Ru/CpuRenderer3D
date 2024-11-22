@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace CpuRenderer3D.Renderers
 {
-    public class ContourRenderer<TFragmentData> : IRenderer where TFragmentData : struct
+    public class ContourEdgeRenderer<TFragmentData> : IRenderer where TFragmentData : struct
     {
         private record struct FragVertex(int TriangleId, FragmentInput<TFragmentData> FragInput);
         private record struct TriangleVertexKey(int TriangleId, int VertexId);
@@ -14,7 +14,7 @@ namespace CpuRenderer3D.Renderers
         private readonly Dictionary<TriangleVertexKey, FragmentInput<TFragmentData>> _triangleVerticesCache;
         private readonly Vector3[] _triangleNormals;
 
-        public ContourRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram)
+        public ContourEdgeRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;

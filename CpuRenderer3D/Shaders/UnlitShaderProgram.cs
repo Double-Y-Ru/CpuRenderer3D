@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace CpuRenderer3D.Demo
+namespace CpuRenderer3D.Shaders
 {
     public class UnlitShaderProgram : IShaderProgram<UnlitFragmentData>
     {
@@ -20,7 +20,7 @@ namespace CpuRenderer3D.Demo
         {
             return new FragmentInput<UnlitFragmentData>(
                 Position: Vector4.Transform(input.Position, shaderContext.ModelProjection).XYZDivW(),
-                Data: new UnlitFragmentData(input.Normal, input.Color, input.UV0));
+                Data: new UnlitFragmentData(input.Color, input.UV0));
         }
 
         public Vector4 ComputeColor(FragmentInput<UnlitFragmentData> input, RenderingContext shaderContext)

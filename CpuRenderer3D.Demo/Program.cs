@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using CpuRenderer3D.Renderers;
+using CpuRenderer3D.Shaders;
 using OpenTK.Windowing.Desktop;
 
 namespace CpuRenderer3D.Demo
@@ -16,7 +17,7 @@ namespace CpuRenderer3D.Demo
         {
             Vector4 ambientColor = new Vector4(0.5f, 0.6f, 0.7f, 1f);
 
-            IShaderProgram<UnlitFragmentData> litColorShader = new LitShaderProgram(Vector4.One, ambientColor);
+            IShaderProgram<LitFragmentData> litColorShader = new LitShaderProgram(Vector4.One, ambientColor);
 
             SceneNode scene = new SceneNode();
 
@@ -25,16 +26,16 @@ namespace CpuRenderer3D.Demo
                 // default scene
 
                 Buffer<Vector4> headTexture = BufferReader.ReadFromFile("african_head_diffuse.png");
-                IShaderProgram<UnlitFragmentData> litHeadTextureShader = new LitShaderProgram(headTexture, ambientColor);
+                IShaderProgram<LitFragmentData> litHeadTextureShader = new LitShaderProgram(headTexture, ambientColor);
                 Mesh headMesh = ObjReader.ReadFromFile("african_head.obj", calculateNormals: false);
                 Transform headTransform = new Transform(Vector3.Zero, Quaternion.Identity);
-                SceneNode head = new SceneNode(headTransform, scene, [new ShadedMeshRenderer<UnlitFragmentData>(headMesh, litHeadTextureShader)]);
+                SceneNode head = new SceneNode(headTransform, scene, [new ShadedMeshRenderer<LitFragmentData>(headMesh, litHeadTextureShader)]);
 
                 Buffer<Vector4> barrelTexture = BufferReader.ReadFromFile("Barrel_diffuse.png");
-                IShaderProgram<UnlitFragmentData> litBarrelTextureShader = new LitShaderProgram(barrelTexture, ambientColor);
+                IShaderProgram<LitFragmentData> litBarrelTextureShader = new LitShaderProgram(barrelTexture, ambientColor);
                 Mesh barrelMesh = ObjReader.ReadFromFile("RustyBarrel.obj", calculateNormals: true);
                 Transform barrelTransform = new Transform(new Vector3(2f, 0f, 0f), Quaternion.Identity);
-                SceneNode barrel = new SceneNode(barrelTransform, scene, [new ShadedMeshRenderer<UnlitFragmentData>(barrelMesh, litBarrelTextureShader)]);
+                SceneNode barrel = new SceneNode(barrelTransform, scene, [new ShadedMeshRenderer<LitFragmentData>(barrelMesh, litBarrelTextureShader)]);
 
                 IShaderProgram<UnlitFragmentData> unlitColorShader = new UnlitShaderProgram(Vector4.One);
                 Mesh quadMesh = ObjReader.ReadFromFile("Quad.obj", calculateNormals: true);
@@ -52,7 +53,7 @@ namespace CpuRenderer3D.Demo
                     Mesh mesh = ObjReader.ReadFromFile(meshPath, calculateNormals: true);
                     IRenderer[] renderers =
                     [
-                        new ShadedMeshRenderer<UnlitFragmentData>(mesh, litColorShader),
+                        new ShadedMeshRenderer<LitFragmentData>(mesh, litColorShader),
                     ];
 
                     SceneNode meshNode = new SceneNode(transform, scene, renderers);
@@ -63,7 +64,7 @@ namespace CpuRenderer3D.Demo
             NativeWindowSettings settings = NativeWindowSettings.Default;
             settings.ClientSize = new OpenTK.Mathematics.Vector2i(WindowWidth, WindowHeight);
 
-            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.25 * Math.PI), 0.1f, 100f);
+            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), EulerAngles.EulerToQuaternion(0f, 0.1f * MathF.PI, 0f)), (float)BufferWidth / BufferHeight, (float)(0.25 * Math.PI), 0.1f, 100f);
 
             Engine engine = new Engine();
 
