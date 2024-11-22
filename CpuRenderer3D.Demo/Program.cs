@@ -30,18 +30,15 @@ namespace CpuRenderer3D.Demo
             int nodeIndex = 0;
             foreach (string meshPath in args)
             {
-                using (StreamReader streamReader = File.OpenText(meshPath))
-                {
-                    Transform transform = new Transform(new Vector3(5f * nodeIndex, 0f, 0f), EulerAngles.EulerToQuaternion(new Vector3(0f, 0f, 0.25f * nodeIndex * MathF.PI)));
+                Transform transform = new Transform(new Vector3(5f * nodeIndex, 0f, 0f), EulerAngles.EulerToQuaternion(new Vector3(0f, 0f, 0.25f * nodeIndex * MathF.PI)));
 
-                    Mesh mesh = ObjReader.Read(streamReader);
-                    IRenderer[] renderers =
-                    [
-                        new ShadedMeshRenderer<UnlitFragmentData>(mesh, litColorShader),
-                    ];
+                Mesh mesh = ObjReader.ReadFromFile(meshPath, calculateNormals: true);
+                IRenderer[] renderers =
+                [
+                    new ShadedMeshRenderer<UnlitFragmentData>(mesh, litColorShader),
+                ];
 
-                    SceneNode meshNode = new SceneNode(transform, scene, renderers);
-                }
+                SceneNode meshNode = new SceneNode(transform, scene, renderers);
                 nodeIndex++;
             }
 

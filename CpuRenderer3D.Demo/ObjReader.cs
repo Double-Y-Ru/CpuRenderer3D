@@ -10,7 +10,13 @@ namespace CpuRenderer3D.Demo
         private record struct FaceComponent(int VertexIndex, int TexCoordIndex, int NormalIndex);
         private record struct Face(FaceComponent V0, FaceComponent V1, FaceComponent V2);
 
-        public static Mesh Read(StreamReader reader)
+        public static Mesh ReadFromFile(string filePath, bool calculateNormals)
+        {
+            using StreamReader streamReader = File.OpenText(filePath);
+            return Read(streamReader, calculateNormals);
+        }
+
+        public static Mesh Read(StreamReader reader, bool calculateNormals)
         {
             List<Vector3> vertices = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
@@ -105,15 +111,25 @@ namespace CpuRenderer3D.Demo
                 ++lineIndex;
             }
 
-            return Mesh.Create(
-                vertices.ToArray(),
-                normals.ToArray(),
-                texCoords.ToArray(),
-                faces.Select(f =>
+            Vector3[] verticesArray = vertices.ToArray();
+            Vector2[] texCoordsArray = texCoords.ToArray();
+            Vector3[] normalsArray = normals.ToArray();
+
+            Triangle[] trianglesArray = faces.Select(f =>
                     new Triangle(
                             new TriangleVertex(f.V0.VertexIndex - 1, f.V0.NormalIndex - 1, f.V0.TexCoordIndex - 1),
                             new TriangleVertex(f.V1.VertexIndex - 1, f.V1.NormalIndex - 1, f.V1.TexCoordIndex - 1),
-                            new TriangleVertex(f.V2.VertexIndex - 1, f.V2.NormalIndex - 1, f.V2.TexCoordIndex - 1))).ToArray()); // In .obj all indices start from 1
+                            new TriangleVertex(f.V2.VertexIndex - 1, f.V2.NormalIndex - 1, f.V2.TexCoordIndex - 1))).ToArray();
+
+            if (calculateNormals)
+            {
+                Mesh.CalculateNormals(verticesArray, trianglesArray, out normalsArray, out trianglesArray);
+                return Mesh.Create(verticesArray, normalsArray, texCoordsArray, trianglesArray);
+            }
+            else
+            {
+                return Mesh.Create(verticesArray, normalsArray, texCoordsArray, trianglesArray);
+            }
         }
     }
 }
