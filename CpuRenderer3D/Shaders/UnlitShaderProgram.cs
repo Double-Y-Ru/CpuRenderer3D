@@ -25,7 +25,7 @@ namespace CpuRenderer3D.Shaders
 
         public Vector4 ComputeColor(FragmentInput<UnlitFragmentData> input, RenderingContext shaderContext)
         {
-            return input.Data.Color * AlbedoTexture.Sample(input.Data.UV0.X, input.Data.UV0.Y);
+            return input.Data.Color * AlbedoTexture.Sample(input.Data.UV0);
         }
 
         public FragmentInput<UnlitFragmentData> Add(FragmentInput<UnlitFragmentData> a, FragmentInput<UnlitFragmentData> b) => new FragmentInput<UnlitFragmentData>(a.Position + b.Position, a.Data + b.Data);

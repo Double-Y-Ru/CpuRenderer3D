@@ -5,7 +5,26 @@ namespace CpuRenderer3D.Demo
 {
     public static class BufferReader
     {
-        public static Buffer<Vector4> ReadFromFile(string filePath)
+        public static Buffer<float> ReadGrayFromFile(string filePath)
+        {
+            using FileStream stream = File.OpenRead(filePath);
+            ImageResult image = ImageResult.FromStream(stream, ColorComponents.Grey);
+
+            Buffer<float> buffer = new Buffer<float>(image.Width, image.Height, 1f);
+            byte[] data = image.Data;
+
+            for (int i = 0; i < image.Width * image.Height; ++i)
+            {
+                byte v = data[i];
+                float vf = v / 255f;
+
+                buffer.Set(i, vf);
+            }
+
+            return buffer;
+        }
+
+        public static Buffer<Vector4> ReadRgbaFromFile(string filePath)
         {
             using FileStream stream = File.OpenRead(filePath);
             ImageResult image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);

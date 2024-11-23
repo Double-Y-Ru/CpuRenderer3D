@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 
 namespace CpuRenderer3D
 {
@@ -72,13 +73,12 @@ namespace CpuRenderer3D
             throw new IndexOutOfRangeException();
         }
 
-        public T Sample(float u, float v)
+        public T Sample(Vector2 uv)
         {
-            u = Math.Clamp(u, 0f, 1f);
-            v = Math.Clamp(v, 0f, 1f);
+            uv = Vector2.Clamp(uv, Vector2.Zero, Vector2.One);
 
-            int x = (int)MathF.Round(u * (Width - 1));
-            int y = Height - 1 - (int)MathF.Round(v * (Height - 1));
+            int x = (int)MathF.Round(uv.X * (Width - 1));
+            int y = Height - 1 - (int)MathF.Round(uv.Y * (Height - 1));
 
             return Get(x, y);
         }
@@ -101,5 +101,7 @@ namespace CpuRenderer3D
             for (int i = 0; i < _data.Length; i++)
                 _data[i] = DefaultDataValue;
         }
+
+        public static Buffer<T> Single(T value) => new Buffer<T>(1, 1, value);
     }
 }
