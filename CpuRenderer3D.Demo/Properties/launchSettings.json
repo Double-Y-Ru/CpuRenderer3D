@@ -2,7 +2,6 @@
   "profiles": {
     "Demo": {
       "commandName": "Project",
-      "commandLineArgs": "",
       "workingDirectory": "..\\TestData"
     },
     "Demo Triangle": {
@@ -12,7 +11,7 @@
     },
     "Demo Quad": {
       "commandName": "Project",
-      "commandLineArgs": "Propeller.obj",
+      "commandLineArgs": "Quad.obj",
       "workingDirectory": "..\\TestData"
     },
     "Demo Propeller": {
