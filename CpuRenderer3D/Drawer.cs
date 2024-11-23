@@ -5,7 +5,11 @@ namespace CpuRenderer3D
 {
     public static class Drawer
     {
-        public static void DrawTriangle<T>(Vector3 f0, Vector3 f1, Vector3 f2, T color, Buffer<T> colorBuffer, Buffer<float> depthBuffer)
+        public delegate bool TestDepth(int x, int y, float depth);
+        public delegate void SetDepth(int x, int y, float depth);
+        public delegate void SetColor<T>(int x, int y, T color);
+
+        public static void DrawTriangle<T>(Vector3 f0, Vector3 f1, Vector3 f2, T color, TestDepth testDepth, SetDepth setDepth, SetColor<T> setColor)
         {
             if (f0.Y == f1.Y
              && f0.Y == f2.Y)
@@ -57,10 +61,10 @@ namespace CpuRenderer3D
 
                 for (int x = lineStartX; x <= lineEndX; x++)
                 {
-                    if (depthBuffer.TryGet(x, y, out float zFromBuffer) && point.Z <= zFromBuffer)
+                    if (testDepth(x, y, point.Z))
                     {
-                        depthBuffer.Set(x, y, point.Z);
-                        colorBuffer.Set(x, y, color);
+                        setDepth(x, y, point.Z);
+                        setColor(x, y, color);
                     }
 
                     point = point + pointDelta;

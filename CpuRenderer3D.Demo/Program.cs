@@ -58,7 +58,7 @@ namespace CpuRenderer3D.Demo
                     Mesh mesh = ObjReader.ReadFromFile(meshPath, calculateNormals: true);
                     IRenderer[] renderers =
                     [
-                        new ShadedMeshRenderer<LitFragmentData>(mesh, litColorShader),
+                        new ColoredMeshWithContourRenderer(mesh, Vector4.One, Vector4.UnitX, 0.00005f),
                     ];
 
                     scene.AddChild(new SceneNode(transform, renderers));

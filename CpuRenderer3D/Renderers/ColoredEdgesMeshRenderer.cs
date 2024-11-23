@@ -50,7 +50,7 @@ namespace CpuRenderer3D.Renderers
                     triangleVertex1Proj = Vector3.Transform(triangleVertex1Proj, renderingContext.ProjectionClip);
                     triangleVertex2Proj = Vector3.Transform(triangleVertex2Proj, renderingContext.ProjectionClip);
 
-                    Drawer.DrawTriangle(triangleVertex0Proj, triangleVertex1Proj, triangleVertex2Proj, _fillColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
+                    Drawer.DrawTriangle(triangleVertex0Proj, triangleVertex1Proj, triangleVertex2Proj, _fillColor, TestDepth, SetDepth, SetColor);
 
                     triangleVertex0Proj -= 0.0001f * Vector3.UnitZ;
                     triangleVertex1Proj -= 0.0001f * Vector3.UnitZ;
@@ -60,6 +60,21 @@ namespace CpuRenderer3D.Renderers
                     Drawer.DrawLine(triangleVertex1Proj, triangleVertex2Proj, _edgeColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
                     Drawer.DrawLine(triangleVertex2Proj, triangleVertex0Proj, _edgeColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
                 }
+            }
+
+            bool TestDepth(int x, int y, float depth)
+            {
+                return renderingContext.DepthBuffer.TryGet(x, y, out float depthFromBuffer) && depth <= depthFromBuffer;
+            }
+
+            void SetDepth(int x, int y, float depth)
+            {
+                renderingContext.DepthBuffer.Set(x, y, depth);
+            }
+
+            void SetColor(int x, int y, Vector4 color)
+            {
+                renderingContext.ColorBuffer.Set(x, y, color);
             }
         }
     }
