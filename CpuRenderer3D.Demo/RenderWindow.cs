@@ -10,7 +10,6 @@ namespace CpuRenderer3D.Demo
 {
     public class RenderWindow : GameWindow
     {
-        private readonly Engine _engine;
         private readonly SceneNode _scene;
         private readonly Camera _camera;
 
