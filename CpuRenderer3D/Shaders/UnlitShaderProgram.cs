@@ -2,7 +2,7 @@
 
 namespace CpuRenderer3D.Shaders
 {
-    public class UnlitShaderProgram : IShaderProgram<UnlitFragmentData>
+    public class UnlitShaderProgram : IShaderProgram<UnlitFragmentData>, IInterpolator<UnlitFragmentData>
     {
         public Buffer<Vector4> AlbedoTexture;
 

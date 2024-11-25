@@ -28,22 +28,22 @@ namespace CpuRenderer3D.Demo
 
                 Buffer<Vector4> headDiffuseTexture = BufferReader.ReadRgbaFromFile("african_head_diffuse.png");
                 Buffer<float> headSpecularTexture = BufferReader.ReadGrayFromFile("african_head_spec.png");
-                IShaderProgram<LitFragmentData> litHeadTextureShader = new LitShaderProgram(headDiffuseTexture, headSpecularTexture, ambientColor, lightDirection);
+                LitShaderProgram litHeadTextureShader = new LitShaderProgram(headDiffuseTexture, headSpecularTexture, ambientColor, lightDirection);
                 Mesh headMesh = ObjReader.ReadFromFile("african_head.obj", calculateNormals: false);
                 Transform headTransform = new Transform(Vector3.Zero, Quaternion.Identity);
-                scene.AddChild(new SceneNode(headTransform, [new ShadedMeshRenderer<LitFragmentData>(headMesh, litHeadTextureShader)]));
+                scene.AddChild(new SceneNode(headTransform, [new ShadedMeshRenderer<LitFragmentData>(headMesh, litHeadTextureShader, litHeadTextureShader)]));
 
                 Buffer<Vector4> barrelDiffuseTexture = BufferReader.ReadRgbaFromFile("Barrel_diffuse.png");
                 Buffer<float> barrelSpecularTexture = BufferReader.ReadGrayFromFile("Barrel_spec.png");
-                IShaderProgram<LitFragmentData> litBarrelTextureShader = new LitShaderProgram(barrelDiffuseTexture, barrelSpecularTexture, ambientColor, lightDirection);
+                LitShaderProgram litBarrelTextureShader = new LitShaderProgram(barrelDiffuseTexture, barrelSpecularTexture, ambientColor, lightDirection);
                 Mesh barrelMesh = ObjReader.ReadFromFile("RustyBarrel.obj", calculateNormals: true);
                 Transform barrelTransform = new Transform(new Vector3(2f, 0f, 0f), Quaternion.Identity);
-                scene.AddChild(new SceneNode(barrelTransform, [new ShadedMeshRenderer<LitFragmentData>(barrelMesh, litBarrelTextureShader)]));
+                scene.AddChild(new SceneNode(barrelTransform, [new ShadedMeshRenderer<LitFragmentData>(barrelMesh, litBarrelTextureShader, litBarrelTextureShader)]));
 
-                IShaderProgram<UnlitFragmentData> unlitColorShader = new UnlitShaderProgram(Vector4.One);
+                UnlitShaderProgram unlitColorShader = new UnlitShaderProgram(Vector4.One);
                 Mesh quadMesh = ObjReader.ReadFromFile("Quad.obj", calculateNormals: true);
                 Transform quadTransform = new Transform(new Vector3(0f, -1.1f, 0f), EulerAngles.EulerToQuaternion(0.25f * MathF.PI, -0.5f * MathF.PI, 0f));
-                scene.AddChild(new SceneNode(quadTransform, [new ShadedMeshRenderer<UnlitFragmentData>(quadMesh, unlitColorShader)]));
+                scene.AddChild(new SceneNode(quadTransform, [new ShadedMeshRenderer<UnlitFragmentData>(quadMesh, unlitColorShader, unlitColorShader)]));
             }
             else
             {

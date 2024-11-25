@@ -6,13 +6,15 @@ namespace CpuRenderer3D.Renderers
     {
         private readonly Mesh _mesh;
         private readonly IShaderProgram<TFragmentData> _shaderProgram;
+        private readonly IInterpolator<TFragmentData> _interpolator;
 
         private readonly FragmentInput<TFragmentData>[] _fragVerticesCache;
 
-        public EdgeRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram)
+        public EdgeRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<TFragmentData> interpolator)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
+            _interpolator = interpolator;
             _fragVerticesCache = new FragmentInput<TFragmentData>[_mesh.GetVertices().Length];
         }
 
@@ -41,8 +43,25 @@ namespace CpuRenderer3D.Renderers
                     fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
                     fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
 
-                    Drawer.DrawLine(renderingContext, fragInput0, fragInput1, _shaderProgram);
+                    Drawer.DrawLine(fragInput0, fragInput1, _interpolator, TestDepth, SetDepth, SetColor);
                 }
+            }
+
+            bool TestDepth(int x, int y, float depth)
+            {
+                return renderingContext.DepthBuffer.TryGet(x, y, out float depthFromBuffer) && depth <= depthFromBuffer;
+            }
+
+            void SetDepth(int x, int y, float depth)
+            {
+                renderingContext.DepthBuffer.Set(x, y, depth);
+            }
+
+            void SetColor(int x, int y, FragmentInput<TFragmentData> fragInput)
+            {
+                Vector4 color = _shaderProgram.ComputeColor(fragInput, renderingContext);
+
+                renderingContext.ColorBuffer.Set(x, y, color);
             }
         }
     }
