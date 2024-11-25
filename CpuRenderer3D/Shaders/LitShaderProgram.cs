@@ -21,12 +21,12 @@ namespace CpuRenderer3D.Shaders
 
         public FragmentInput<LitFragmentData> ComputeVertex(VertexInput input, RenderingContext shaderContext)
         {
-            Vector3 position = Vector4.Transform(input.Position, shaderContext.ModelClip).XYZDivW();
-            Vector3 normal = Vector3.TransformNormal(input.Normal, shaderContext.ModelClip);
+            Vector4 positionClip = Vector4.Transform(input.Position, shaderContext.ModelClip);
+            Vector3 normalClip = Vector3.TransformNormal(input.Normal, shaderContext.ModelClip);
 
             return new FragmentInput<LitFragmentData>(
-                Position: position,
-                Data: new LitFragmentData(normal, input.Color, input.UV0));
+                Position: positionClip,
+                Data: new LitFragmentData(normalClip, input.Color, input.UV0));
         }
 
         public Vector4 ComputeColor(FragmentInput<LitFragmentData> input, RenderingContext shaderContext)
@@ -54,5 +54,10 @@ namespace CpuRenderer3D.Shaders
         public FragmentInput<LitFragmentData> Subtract(FragmentInput<LitFragmentData> a, FragmentInput<LitFragmentData> b) => new FragmentInput<LitFragmentData>(a.Position - b.Position, a.Data - b.Data);
         public FragmentInput<LitFragmentData> Multiply(FragmentInput<LitFragmentData> a, float f) => new FragmentInput<LitFragmentData>(a.Position * f, a.Data * f);
         public FragmentInput<LitFragmentData> Divide(FragmentInput<LitFragmentData> a, float f) => new FragmentInput<LitFragmentData>(a.Position / f, a.Data / f);
+
+        public FragmentInput<LitFragmentData> InterpolateBary(FragmentInput<LitFragmentData> point0, FragmentInput<LitFragmentData> point1, FragmentInput<LitFragmentData> point2, Vector3 bary)
+        {
+            return Add(Add(Multiply(point0, bary.X), Multiply(point1, bary.Y)), Multiply(point2, bary.Z));
+        }
     }
 }

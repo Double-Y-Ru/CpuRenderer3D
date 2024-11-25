@@ -56,9 +56,9 @@ namespace CpuRenderer3D.Renderers
                     triangleVertex1Proj -= 0.0001f * Vector3.UnitZ;
                     triangleVertex2Proj -= 0.0001f * Vector3.UnitZ;
 
-                    Drawer.DrawLine(triangleVertex0Proj, triangleVertex1Proj, _edgeColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
-                    Drawer.DrawLine(triangleVertex1Proj, triangleVertex2Proj, _edgeColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
-                    Drawer.DrawLine(triangleVertex2Proj, triangleVertex0Proj, _edgeColor, renderingContext.ColorBuffer, renderingContext.DepthBuffer);
+                    Drawer.DrawLine(triangleVertex0Proj, triangleVertex1Proj, _edgeColor, TestDepth, SetDepth, SetColor);
+                    Drawer.DrawLine(triangleVertex1Proj, triangleVertex2Proj, _edgeColor, TestDepth, SetDepth, SetColor);
+                    Drawer.DrawLine(triangleVertex2Proj, triangleVertex0Proj, _edgeColor, TestDepth, SetDepth, SetColor);
                 }
             }
 

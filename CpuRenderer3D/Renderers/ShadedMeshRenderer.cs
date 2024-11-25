@@ -29,46 +29,20 @@ namespace CpuRenderer3D.Renderers
                 FragmentInput<TFragmentData> fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
                 FragmentInput<TFragmentData> fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
 
-                Vector3 triangleNormalP = Vector3.Cross(
-                    fragInput0.Position - fragInput1.Position,
-                    fragInput0.Position - fragInput2.Position);
-
-                if (Vector3.Dot(triangleNormalP, Vector3.UnitZ) < 0) continue;
-
-                if (-1f < fragInput0.Position.X && fragInput0.Position.X < 1f
-                 && -1f < fragInput0.Position.Y && fragInput0.Position.Y < 1f
-                 && -1f < fragInput0.Position.Z && fragInput0.Position.Z < 1f
-                 && -1f < fragInput1.Position.X && fragInput1.Position.X < 1f
-                 && -1f < fragInput1.Position.Y && fragInput1.Position.Y < 1f
-                 && -1f < fragInput1.Position.Z && fragInput1.Position.Z < 1f
-                 && -1f < fragInput2.Position.X && fragInput2.Position.X < 1f
-                 && -1f < fragInput2.Position.Y && fragInput2.Position.Y < 1f
-                 && -1f < fragInput2.Position.Z && fragInput2.Position.Z < 1f
-                 )
-                {
-                    fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ClipScreen);
-                    fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ClipScreen);
-                    fragInput2.Position = Vector3.Transform(fragInput2.Position, renderingContext.ClipScreen);
-
-                    Drawer.DrawTriangle(fragInput0, fragInput1, fragInput2, _interpolator, TestDepth, SetDepth, SetColor);
-                }
+                Drawer.DrawTriangleBary(fragInput0, fragInput1, fragInput2, _interpolator, renderingContext.ClipScreen, TestPixel, SetPixel);
             }
 
 
-            bool TestDepth(int x, int y, float depth)
+            bool TestPixel(int x, int y, FragmentInput<TFragmentData> fragmentInput)
             {
-                return renderingContext.DepthBuffer.TryGet(x, y, out float depthFromBuffer) && depth <= depthFromBuffer;
+                return renderingContext.DepthBuffer.TryGet(x, y, out float depthFromBuffer) && fragmentInput.Position.Z <= depthFromBuffer;
             }
 
-            void SetDepth(int x, int y, float depth)
+            void SetPixel(int x, int y, FragmentInput<TFragmentData> fragmentInput)
             {
-                renderingContext.DepthBuffer.Set(x, y, depth);
-            }
+                renderingContext.DepthBuffer.Set(x, y, fragmentInput.Position.Z);
 
-            void SetColor(int x, int y, FragmentInput<TFragmentData> fragmentInput)
-            {
                 Vector4 color = _shaderProgram.ComputeColor(fragmentInput, renderingContext);
-
                 renderingContext.ColorBuffer.Set(x, y, color);
             }
         }

@@ -5,11 +5,45 @@ namespace CpuRenderer3D
 {
     public static class Drawer
     {
-        public delegate bool TestDepth(int x, int y, float depth);
-        public delegate void SetDepth(int x, int y, float depth);
-        public delegate void SetColor<T>(int x, int y, T color);
+        public delegate bool TestPixel<T>(int x, int y, T pixel);
+        public delegate void SetPixel<T>(int x, int y, T pixel);
 
-        public static void DrawTriangle<T>(Vector3 f0, Vector3 f1, Vector3 f2, T color, TestDepth testDepth, SetDepth setDepth, SetColor<T> setColor)
+        public static void DrawTriangleBary<TFragmentData>(FragmentInput<TFragmentData> point0Clip, FragmentInput<TFragmentData> point1Clip, FragmentInput<TFragmentData> point2Clip, IInterpolator<TFragmentData> interpolator, Matrix4x4 clipScreen, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
+        {
+            Vector4 point0Screen = Vector4.Transform(point0Clip.Position, clipScreen);
+            Vector4 point1Screen = Vector4.Transform(point1Clip.Position, clipScreen);
+            Vector4 point2Screen = Vector4.Transform(point2Clip.Position, clipScreen);
+
+            Vector2 point0ScreenDivW = point0Screen.XYDivW();
+            Vector2 point1ScreenDivW = point1Screen.XYDivW();
+            Vector2 point2ScreenDivW = point2Screen.XYDivW();
+
+            float triangleNormalZ = VectorExtenstions.Cross(
+                point0ScreenDivW - point1ScreenDivW,
+                point0ScreenDivW - point2ScreenDivW);
+
+            if (triangleNormalZ < 0) return;
+
+            GetBoundingBox(new Vector2[] { point0ScreenDivW, point1ScreenDivW, point2ScreenDivW }, new Vector2(2f * clipScreen.M41, 2f * clipScreen.M42), out Vector2 bboxmin, out Vector2 bboxmax);
+
+            for (int y = (int)bboxmin.Y; y <= (int)bboxmax.Y; y++)
+                for (int x = (int)bboxmin.X; x <= (int)bboxmax.X; x++)
+                {
+                    Vector2 pointScreen = new Vector2(x, y);
+                    Vector3 pointBaryScreen = Barycentric(point0ScreenDivW, point1ScreenDivW, point2ScreenDivW, pointScreen);
+                    Vector3 pointBaryClip = new Vector3(pointBaryScreen.X / point0Screen.W, pointBaryScreen.Y / point1Screen.W, pointBaryScreen.Z / point2Screen.W);
+                    pointBaryClip = pointBaryClip / (pointBaryClip.X + pointBaryClip.Y + pointBaryClip.Z);
+
+                    if (pointBaryScreen.X < 0 || pointBaryScreen.Y < 0 || pointBaryScreen.Z < 0) continue;
+
+                    FragmentInput<TFragmentData> interpolatedFragInput = interpolator.InterpolateBary(point0Clip, point1Clip, point2Clip, pointBaryClip);
+
+                    if (testPixel(x, y, interpolatedFragInput))
+                        setPixel(x, y, interpolatedFragInput);
+                }
+        }
+
+        public static void DrawTriangle<T>(Vector3 f0, Vector3 f1, Vector3 f2, T color, TestPixel<float> testDepth, SetPixel<float> setDepth, SetPixel<T> setColor)
         {
             if (f0.Y == f1.Y
              && f0.Y == f2.Y)
@@ -72,7 +106,7 @@ namespace CpuRenderer3D
             }
         }
 
-        public static void DrawTriangle<TFragmentData>(FragmentInput<TFragmentData> f0, FragmentInput<TFragmentData> f1, FragmentInput<TFragmentData> f2, IInterpolator<TFragmentData> interpolator, TestDepth testDepth, SetDepth setDepth, SetColor<FragmentInput<TFragmentData>> setColor) where TFragmentData : struct
+        public static void DrawTriangle<TFragmentData>(FragmentInput<TFragmentData> f0, FragmentInput<TFragmentData> f1, FragmentInput<TFragmentData> f2, IInterpolator<TFragmentData> interpolator, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
         {
             if (f0.Position.Y == f1.Position.Y
              && f0.Position.Y == f2.Position.Y)
@@ -124,18 +158,15 @@ namespace CpuRenderer3D
 
                 for (int x = lineStartX; x <= lineEndX; x++)
                 {
-                    if (testDepth(x, y, fragInput.Position.Z))
-                    {
-                        setDepth(x, y, fragInput.Position.Z);
-                        setColor(x, y, fragInput);
-                    }
+                    if (testPixel(x, y, fragInput))
+                        setPixel(x, y, fragInput);
 
                     fragInput = interpolator.Add(fragInput, fragInputDelta);
                 }
             }
         }
 
-        public static void DrawLine<T>(Vector3 f0, Vector3 f1, T color, Buffer<T> colorBuffer, Buffer<float> depthBuffer)
+        public static void DrawLine<T>(Vector3 f0, Vector3 f1, T color, TestPixel<float> testDepth, SetPixel<float> setDepth, SetPixel<T> setColor)
         {
             bool isGentle = true;
 
@@ -172,18 +203,18 @@ namespace CpuRenderer3D
             {
                 if (isGentle)
                 {
-                    if (depthBuffer.TryGet(x, y, out float zFromBuffer) && z <= zFromBuffer)
+                    if (testDepth(x, y, z))
                     {
-                        depthBuffer.Set(x, y, z);
-                        colorBuffer.Set(x, y, color);
+                        setDepth(x, y, z);
+                        setColor(x, y, color);
                     }
                 }
                 else
                 {
-                    if (depthBuffer.TryGet(y, x, out float zFromBuffer) && z <= zFromBuffer)
+                    if (testDepth(y, x, z))
                     {
-                        depthBuffer.Set(y, x, z);
-                        colorBuffer.Set(y, x, color);
+                        setDepth(y, x, z);
+                        setColor(y, x, color);
                     }
                 }
                 error2 += derror2;
@@ -198,7 +229,7 @@ namespace CpuRenderer3D
             }
         }
 
-        public static void DrawLine<TFragmentData>(FragmentInput<TFragmentData> f0, FragmentInput<TFragmentData> f1, IInterpolator<TFragmentData> interpolator, TestDepth testDepth, SetDepth setDepth, SetColor<FragmentInput<TFragmentData>> setColor) where TFragmentData : struct
+        public static void DrawLine<TFragmentData>(FragmentInput<TFragmentData> f0, FragmentInput<TFragmentData> f1, IInterpolator<TFragmentData> interpolator, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
         {
             bool isGentle = true;
 
@@ -206,8 +237,8 @@ namespace CpuRenderer3D
             {
                 isGentle = false;
 
-                Vector3 f0Pos = new Vector3(f0.Position.Y, f0.Position.X, f0.Position.Z);
-                Vector3 f1Pos = new Vector3(f1.Position.Y, f1.Position.X, f1.Position.Z);
+                Vector4 f0Pos = new Vector4(f0.Position.Y, f0.Position.X, f0.Position.Z, f0.Position.W);
+                Vector4 f1Pos = new Vector4(f1.Position.Y, f1.Position.X, f1.Position.Z, f1.Position.W);
 
                 f0.Position = f0Pos;
                 f1.Position = f1Pos;
@@ -238,19 +269,13 @@ namespace CpuRenderer3D
             {
                 if (isGentle)
                 {
-                    if (testDepth(x, y, fragInput.Position.Z))
-                    {
-                        setDepth(x, y, fragInput.Position.Z);
-                        setColor(x, y, fragInput);
-                    }
+                    if (testPixel(x, y, fragInput))
+                        setPixel(x, y, fragInput);
                 }
                 else
                 {
-                    if (testDepth(y, x, fragInput.Position.Z))
-                    {
-                        setDepth(y, x, fragInput.Position.Z);
-                        setColor(y, x, fragInput);
-                    }
+                    if (testPixel(y, x, fragInput))
+                        setPixel(y, x, fragInput);
                 }
                 error2 += derror2;
 
@@ -262,6 +287,35 @@ namespace CpuRenderer3D
 
                 fragInput = interpolator.Add(fragInput, fragInputDelta);
             }
+        }
+
+        private static void GetBoundingBox(Vector2[] points, Vector2 clamp, out Vector2 bboxmin, out Vector2 bboxmax)
+        {
+            bboxmin = clamp;
+            bboxmax = new Vector2(0f, 0f);
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                bboxmin.X = MathF.Max(0, MathF.Min(bboxmin.X, points[i].X));
+                bboxmax.X = MathF.Min(clamp.X, MathF.Max(bboxmax.X, points[i].X));
+
+                bboxmin.Y = MathF.Max(0, MathF.Min(bboxmin.Y, points[i].Y));
+                bboxmax.Y = MathF.Min(clamp.Y, MathF.Max(bboxmax.Y, points[i].Y));
+            }
+        }
+
+        private static Vector3 Barycentric(Vector2 point0, Vector2 point1, Vector2 point2, Vector2 P)
+        {
+            Vector3 u = Vector3.Cross(
+                new Vector3(point2.X - point0.X,
+                            point1.X - point0.X,
+                            point0.X - P.X),
+                new Vector3(point2.Y - point0.Y,
+                            point1.Y - point0.Y,
+                            point0.Y - P.Y));
+
+            if (MathF.Abs(u.Z) < 1f) return new Vector3(-1f, 1f, 1f); // triangle is degenerate, in this case return smth with negative coordinates
+            return new Vector3(1f - (u.X + u.Y) / u.Z, u.Y / u.Z, u.X / u.Z);
         }
 
         private static void Swap<T>(ref T a, ref T b)

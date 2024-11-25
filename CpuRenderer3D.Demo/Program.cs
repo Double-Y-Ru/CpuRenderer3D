@@ -40,7 +40,7 @@ namespace CpuRenderer3D.Demo
                 Transform barrelTransform = new Transform(new Vector3(2f, 0f, 0f), Quaternion.Identity);
                 scene.AddChild(new SceneNode(barrelTransform, [new ShadedMeshRenderer<LitFragmentData>(barrelMesh, litBarrelTextureShader, litBarrelTextureShader)]));
 
-                UnlitShaderProgram unlitColorShader = new UnlitShaderProgram(Vector4.One);
+                UnlitShaderProgram unlitColorShader = new UnlitShaderProgram(headDiffuseTexture);
                 Mesh quadMesh = ObjReader.ReadFromFile("Quad.obj", calculateNormals: true);
                 Transform quadTransform = new Transform(new Vector3(0f, -1.1f, 0f), EulerAngles.EulerToQuaternion(0.25f * MathF.PI, -0.5f * MathF.PI, 0f));
                 scene.AddChild(new SceneNode(quadTransform, [new ShadedMeshRenderer<UnlitFragmentData>(quadMesh, unlitColorShader, unlitColorShader)]));
@@ -69,7 +69,7 @@ namespace CpuRenderer3D.Demo
             NativeWindowSettings settings = NativeWindowSettings.Default;
             settings.ClientSize = new OpenTK.Mathematics.Vector2i(WindowWidth, WindowHeight);
 
-            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), EulerAngles.EulerToQuaternion(0f, 0.1f * MathF.PI, 0f)), (float)BufferWidth / BufferHeight, (float)(0.25 * Math.PI), 0.1f, 100f);
+            Camera camera = Camera.CreatePerspective(new Transform(new Vector3(0f, 0f, 15f), Quaternion.Identity), (float)BufferWidth / BufferHeight, (float)(0.25 * Math.PI), 0.1f, 100f);
 
             RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, scene, camera, bgColor);
             renderWindow.Run();

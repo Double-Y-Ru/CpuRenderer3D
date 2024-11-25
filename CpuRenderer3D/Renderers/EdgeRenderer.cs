@@ -40,27 +40,23 @@ namespace CpuRenderer3D.Renderers
                  && -1f < fragInput1.Position.Y && fragInput1.Position.Y < 1f
                  && -1f < fragInput1.Position.Z && fragInput1.Position.Z < 1f)
                 {
-                    fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ClipScreen) - Vector3.UnitZ * 0.0001f;
-                    fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ClipScreen) - Vector3.UnitZ * 0.0001f;
+                    fragInput0.Position = Vector4.Transform(fragInput0.Position, renderingContext.ClipScreen) - Vector4.UnitZ * 0.0001f;
+                    fragInput1.Position = Vector4.Transform(fragInput1.Position, renderingContext.ClipScreen) - Vector4.UnitZ * 0.0001f;
 
-                    Drawer.DrawLine(fragInput0, fragInput1, _interpolator, TestDepth, SetDepth, SetColor);
+                    Drawer.DrawLine(fragInput0, fragInput1, _interpolator, TestPixel, SetPixel);
                 }
             }
 
-            bool TestDepth(int x, int y, float depth)
+            bool TestPixel(int x, int y, FragmentInput<TFragmentData> fragInput)
             {
-                return renderingContext.DepthBuffer.TryGet(x, y, out float depthFromBuffer) && depth <= depthFromBuffer;
+                return renderingContext.DepthBuffer.TryGet(x, y, out float depthFromBuffer) && fragInput.Position.Z <= depthFromBuffer;
             }
 
-            void SetDepth(int x, int y, float depth)
+            void SetPixel(int x, int y, FragmentInput<TFragmentData> fragInput)
             {
-                renderingContext.DepthBuffer.Set(x, y, depth);
-            }
+                renderingContext.DepthBuffer.Set(x, y, fragInput.Position.Z);
 
-            void SetColor(int x, int y, FragmentInput<TFragmentData> fragInput)
-            {
                 Vector4 color = _shaderProgram.ComputeColor(fragInput, renderingContext);
-
                 renderingContext.ColorBuffer.Set(x, y, color);
             }
         }

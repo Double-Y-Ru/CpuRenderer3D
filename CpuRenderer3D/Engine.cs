@@ -66,11 +66,14 @@ namespace CpuRenderer3D
 
         private static Matrix4x4 CreateProjectionClipMatrix(int bufferWidth, int bufferHeight)
         {
+            float halfWidth = 0.5f * bufferWidth;
+            float halfHeight = 0.5f * bufferHeight;
+
             return new Matrix4x4(
-                0.5f * bufferWidth, 0, 0, 0,
-                0, 0.5f * bufferHeight, 0, 0,
+                halfWidth, 0, 0, 0,
+                0, halfHeight, 0, 0,
                 0, 0, 1, 0,
-                0.5f * bufferWidth, 0.5f * bufferHeight, 0, 1);
+                halfWidth, halfHeight, 0, 1);
         }
     }
 }

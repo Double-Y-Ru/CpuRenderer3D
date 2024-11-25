@@ -7,7 +7,7 @@ namespace CpuRenderer3D.Demo
         public FragmentInput<Vector4> ComputeVertex(VertexInput input, RenderingContext shaderContext)
         {
             return new FragmentInput<Vector4>(
-                input.Position,
+                new Vector4(input.Position, 1f),
                 input.Color);
         }
 

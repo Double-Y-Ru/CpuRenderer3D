@@ -49,7 +49,7 @@ namespace CpuRenderer3D.Demo
             _scene = scene;
             _camera = camera;
             _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, backgroundColor);
-            _depthBuffer = new Buffer<float>(bufferWidth, bufferHeight, 1f);
+            _depthBuffer = new Buffer<float>(bufferWidth, bufferHeight, float.PositiveInfinity);
             _dataBuffer = new Buffer<int>(bufferWidth, bufferHeight, 0);
 
             _texture = new GlTexture();
