@@ -12,43 +12,43 @@ namespace CpuRenderer3D
 
         public Matrix4x4 ModelWorld;// entity
         public Matrix4x4 WorldView;// camera
-        public Matrix4x4 ViewProjection;// projection
-        public Matrix4x4 ProjectionClip;// rendering screen
+        public Matrix4x4 ViewClip;// projection
+        public Matrix4x4 ClipScreen;// rendering screen
 
-        public Matrix4x4 WorldProjection;// WorldView * ViewProjection 
-        public Matrix4x4 ModelProjection;// ModelWorld * ModelProjection 
-        public Matrix4x4 ModelClip;// ProjectionClip * ClipView
+        public Matrix4x4 WorldClip;// WorldView * ViewClip 
+        public Matrix4x4 ModelClip;// ModelWorld * WorldClip 
+        public Matrix4x4 ModelScreen;// ClipScreen * ModelClip
 
         public RenderingContext(Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer, Buffer<int> dataBuffer,
-            Matrix4x4 worldView, Matrix4x4 viewProjection, Matrix4x4 projectionClip)
+            Matrix4x4 worldView, Matrix4x4 viewClip, Matrix4x4 clipScreen)
         {
             ColorBuffer = colorBuffer;
             DepthBuffer = depthBuffer;
             DataBuffer = dataBuffer;
 
             WorldView = worldView;
-            ViewProjection = viewProjection;
-            ProjectionClip = projectionClip;
+            ViewClip = viewClip;
+            ClipScreen = clipScreen;
 
             ModelWorld = Matrix4x4.Identity; //it will be set personally for each entity in rendering cycle
 
-            WorldProjection = WorldView * ViewProjection;
-            ModelProjection = ModelWorld * WorldProjection;
-            ModelClip = ProjectionClip * ModelProjection;
+            WorldClip = WorldView * ViewClip;
+            ModelClip = ModelWorld * WorldClip;
+            ModelScreen = ClipScreen * ModelClip;
         }
 
         public void SetWorldView(Matrix4x4 camera)
         {
             WorldView = camera;
-            ModelProjection = ModelWorld * WorldProjection;
-            ModelClip = ProjectionClip * ModelProjection;
+            ModelClip = ModelWorld * WorldClip;
+            ModelScreen = ClipScreen * ModelClip;
         }
 
         public void SetModelWorld(Matrix4x4 modelWorld)
         {
             ModelWorld = modelWorld;
-            ModelProjection = ModelWorld * WorldProjection;
-            ModelClip = ProjectionClip * ModelProjection;
+            ModelClip = ModelWorld * WorldClip;
+            ModelScreen = ClipScreen * ModelClip;
         }
     }
 }

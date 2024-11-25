@@ -40,8 +40,8 @@ namespace CpuRenderer3D.Renderers
                  && -1f < fragInput1.Position.Y && fragInput1.Position.Y < 1f
                  && -1f < fragInput1.Position.Z && fragInput1.Position.Z < 1f)
                 {
-                    fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
-                    fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ProjectionClip) - Vector3.UnitZ * 0.0001f;
+                    fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ClipScreen) - Vector3.UnitZ * 0.0001f;
+                    fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ClipScreen) - Vector3.UnitZ * 0.0001f;
 
                     Drawer.DrawLine(fragInput0, fragInput1, _interpolator, TestDepth, SetDepth, SetColor);
                 }

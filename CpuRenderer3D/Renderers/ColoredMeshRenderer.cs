@@ -23,9 +23,9 @@ namespace CpuRenderer3D.Renderers
                 Vector3 triangleVertex1Local = _mesh.GetVertex(triangle.Vertex1.VertexIndex);
                 Vector3 triangleVertex2Local = _mesh.GetVertex(triangle.Vertex2.VertexIndex);
 
-                Vector3 triangleVertex0Proj = Vector4.Transform(triangleVertex0Local, renderingContext.ModelProjection).XYZDivW();
-                Vector3 triangleVertex1Proj = Vector4.Transform(triangleVertex1Local, renderingContext.ModelProjection).XYZDivW();
-                Vector3 triangleVertex2Proj = Vector4.Transform(triangleVertex2Local, renderingContext.ModelProjection).XYZDivW();
+                Vector3 triangleVertex0Proj = Vector4.Transform(triangleVertex0Local, renderingContext.ModelClip).XYZDivW();
+                Vector3 triangleVertex1Proj = Vector4.Transform(triangleVertex1Local, renderingContext.ModelClip).XYZDivW();
+                Vector3 triangleVertex2Proj = Vector4.Transform(triangleVertex2Local, renderingContext.ModelClip).XYZDivW();
 
                 Vector3 triangleNormalP = Vector3.Cross(
                     triangleVertex0Proj - triangleVertex1Proj,
@@ -44,9 +44,9 @@ namespace CpuRenderer3D.Renderers
                  && -1f < triangleVertex2Proj.Z && triangleVertex2Proj.Z < 1f
                  )
                 {
-                    triangleVertex0Proj = Vector3.Transform(triangleVertex0Proj, renderingContext.ProjectionClip);
-                    triangleVertex1Proj = Vector3.Transform(triangleVertex1Proj, renderingContext.ProjectionClip);
-                    triangleVertex2Proj = Vector3.Transform(triangleVertex2Proj, renderingContext.ProjectionClip);
+                    triangleVertex0Proj = Vector3.Transform(triangleVertex0Proj, renderingContext.ClipScreen);
+                    triangleVertex1Proj = Vector3.Transform(triangleVertex1Proj, renderingContext.ClipScreen);
+                    triangleVertex2Proj = Vector3.Transform(triangleVertex2Proj, renderingContext.ClipScreen);
 
                     Drawer.DrawTriangle(triangleVertex0Proj, triangleVertex1Proj, triangleVertex2Proj, _fillColor, TestDepth, SetDepth, SetColor);
                 }

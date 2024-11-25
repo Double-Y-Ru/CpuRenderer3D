@@ -19,7 +19,7 @@ namespace CpuRenderer3D.Shaders
         public FragmentInput<UnlitFragmentData> ComputeVertex(VertexInput input, RenderingContext shaderContext)
         {
             return new FragmentInput<UnlitFragmentData>(
-                Position: Vector4.Transform(input.Position, shaderContext.ModelProjection).XYZDivW(),
+                Position: Vector4.Transform(input.Position, shaderContext.ModelClip).XYZDivW(),
                 Data: new UnlitFragmentData(input.Color, input.UV0));
         }
 

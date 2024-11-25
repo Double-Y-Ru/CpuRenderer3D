@@ -46,9 +46,9 @@ namespace CpuRenderer3D.Renderers
                  && -1f < fragInput2.Position.Z && fragInput2.Position.Z < 1f
                  )
                 {
-                    fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ProjectionClip);
-                    fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ProjectionClip);
-                    fragInput2.Position = Vector3.Transform(fragInput2.Position, renderingContext.ProjectionClip);
+                    fragInput0.Position = Vector3.Transform(fragInput0.Position, renderingContext.ClipScreen);
+                    fragInput1.Position = Vector3.Transform(fragInput1.Position, renderingContext.ClipScreen);
+                    fragInput2.Position = Vector3.Transform(fragInput2.Position, renderingContext.ClipScreen);
 
                     Drawer.DrawTriangle(fragInput0, fragInput1, fragInput2, _interpolator, TestDepth, SetDepth, SetColor);
                 }

@@ -21,8 +21,8 @@ namespace CpuRenderer3D.Shaders
 
         public FragmentInput<LitFragmentData> ComputeVertex(VertexInput input, RenderingContext shaderContext)
         {
-            Vector3 position = Vector4.Transform(input.Position, shaderContext.ModelProjection).XYZDivW();
-            Vector3 normal = Vector3.TransformNormal(input.Normal, shaderContext.ModelProjection);
+            Vector3 position = Vector4.Transform(input.Position, shaderContext.ModelClip).XYZDivW();
+            Vector3 normal = Vector3.TransformNormal(input.Normal, shaderContext.ModelClip);
 
             return new FragmentInput<LitFragmentData>(
                 Position: position,
