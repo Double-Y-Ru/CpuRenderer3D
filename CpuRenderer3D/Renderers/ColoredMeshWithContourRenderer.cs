@@ -44,32 +44,32 @@ namespace CpuRenderer3D.Renderers
                 Vector3 triangleVertex1Local = _mesh.GetVertex(triangle.Vertex1.VertexIndex);
                 Vector3 triangleVertex2Local = _mesh.GetVertex(triangle.Vertex2.VertexIndex);
 
-                Vector3 triangleVertex0Proj = Vector4.Transform(triangleVertex0Local, renderingContext.ModelClip).XYZDivW();
-                Vector3 triangleVertex1Proj = Vector4.Transform(triangleVertex1Local, renderingContext.ModelClip).XYZDivW();
-                Vector3 triangleVertex2Proj = Vector4.Transform(triangleVertex2Local, renderingContext.ModelClip).XYZDivW();
+                Vector3 triangleVertex0ClipDivW = Vector4.Transform(triangleVertex0Local, renderingContext.ModelClip).XYZDivW();
+                Vector3 triangleVertex1ClipDivW = Vector4.Transform(triangleVertex1Local, renderingContext.ModelClip).XYZDivW();
+                Vector3 triangleVertex2ClipDivW = Vector4.Transform(triangleVertex2Local, renderingContext.ModelClip).XYZDivW();
 
                 Vector3 triangleNormalP = Vector3.Cross(
-                    triangleVertex0Proj - triangleVertex1Proj,
-                    triangleVertex0Proj - triangleVertex2Proj);
+                    triangleVertex0ClipDivW - triangleVertex1ClipDivW,
+                    triangleVertex0ClipDivW - triangleVertex2ClipDivW);
 
                 if (Vector3.Dot(triangleNormalP, Vector3.UnitZ) < 0) continue;
 
-                if (-1f < triangleVertex0Proj.X && triangleVertex0Proj.X < 1f
-                 && -1f < triangleVertex0Proj.Y && triangleVertex0Proj.Y < 1f
-                 && -1f < triangleVertex0Proj.Z && triangleVertex0Proj.Z < 1f
-                 && -1f < triangleVertex1Proj.X && triangleVertex1Proj.X < 1f
-                 && -1f < triangleVertex1Proj.Y && triangleVertex1Proj.Y < 1f
-                 && -1f < triangleVertex1Proj.Z && triangleVertex1Proj.Z < 1f
-                 && -1f < triangleVertex2Proj.X && triangleVertex2Proj.X < 1f
-                 && -1f < triangleVertex2Proj.Y && triangleVertex2Proj.Y < 1f
-                 && -1f < triangleVertex2Proj.Z && triangleVertex2Proj.Z < 1f
+                if (-1f < triangleVertex0ClipDivW.X && triangleVertex0ClipDivW.X < 1f
+                 && -1f < triangleVertex0ClipDivW.Y && triangleVertex0ClipDivW.Y < 1f
+                 && -1f < triangleVertex0ClipDivW.Z && triangleVertex0ClipDivW.Z < 1f
+                 && -1f < triangleVertex1ClipDivW.X && triangleVertex1ClipDivW.X < 1f
+                 && -1f < triangleVertex1ClipDivW.Y && triangleVertex1ClipDivW.Y < 1f
+                 && -1f < triangleVertex1ClipDivW.Z && triangleVertex1ClipDivW.Z < 1f
+                 && -1f < triangleVertex2ClipDivW.X && triangleVertex2ClipDivW.X < 1f
+                 && -1f < triangleVertex2ClipDivW.Y && triangleVertex2ClipDivW.Y < 1f
+                 && -1f < triangleVertex2ClipDivW.Z && triangleVertex2ClipDivW.Z < 1f
                  )
                 {
-                    triangleVertex0Proj = Vector3.Transform(triangleVertex0Proj, renderingContext.ClipScreen);
-                    triangleVertex1Proj = Vector3.Transform(triangleVertex1Proj, renderingContext.ClipScreen);
-                    triangleVertex2Proj = Vector3.Transform(triangleVertex2Proj, renderingContext.ClipScreen);
+                    triangleVertex0ClipDivW = Vector3.Transform(triangleVertex0ClipDivW, renderingContext.ClipScreen);
+                    triangleVertex1ClipDivW = Vector3.Transform(triangleVertex1ClipDivW, renderingContext.ClipScreen);
+                    triangleVertex2ClipDivW = Vector3.Transform(triangleVertex2ClipDivW, renderingContext.ClipScreen);
 
-                    Drawer.DrawTriangle(triangleVertex0Proj, triangleVertex1Proj, triangleVertex2Proj, _fillColor, TestDepth, SetDepth, SetColor);
+                    Drawer.DrawTriangle(triangleVertex0ClipDivW, triangleVertex1ClipDivW, triangleVertex2ClipDivW, _fillColor, TestDepth, SetDepth, SetColor);
                 }
             }
 
