@@ -15,7 +15,6 @@ namespace CpuRenderer3D.Demo
 
         private readonly Buffer<Vector4> _colorBuffer;
         private readonly Buffer<float> _depthBuffer;
-        private readonly Buffer<int> _dataBuffer;
 
         private bool _shouldShowDepth = false;
 
@@ -52,7 +51,6 @@ namespace CpuRenderer3D.Demo
             _camera = camera;
             _colorBuffer = new Buffer<Vector4>(bufferWidth, bufferHeight, backgroundColor);
             _depthBuffer = new Buffer<float>(bufferWidth, bufferHeight, float.PositiveInfinity);
-            _dataBuffer = new Buffer<int>(bufferWidth, bufferHeight, 0);
 
             _texture = new GlTexture();
             _vertexBuffer = new GlBuffer();
@@ -130,7 +128,7 @@ namespace CpuRenderer3D.Demo
             _stopWatch.Reset();
             _stopWatch.Start();
 
-            Engine.Render(_scene, _camera, _colorBuffer, _depthBuffer, _dataBuffer);
+            Engine.Render(_scene, _camera, _colorBuffer, _depthBuffer);
 
             _stopWatch.Stop();
 

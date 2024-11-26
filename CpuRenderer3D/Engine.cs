@@ -13,7 +13,6 @@ namespace CpuRenderer3D
             _renderingContext = new RenderingContext(
                 new Buffer<Vector4>(bufferWidth, bufferHeight, backgroundColor),
                 new Buffer<float>(bufferWidth, bufferHeight, 1f),
-                new Buffer<int>(bufferWidth, bufferHeight, 0),
                 worldView: camera.GetWorldViewMatrix(),
                 viewClip: camera.GetViewProjectionMatrix(),
                 clipScreen: CreateClipScreenMatrix(bufferWidth, bufferHeight));
@@ -22,7 +21,7 @@ namespace CpuRenderer3D
             _camera = camera;
         }
 
-        public void Render(out Buffer<Vector4> colorBuffer, out Buffer<float> depthBuffer, out Buffer<int> dataBuffer)
+        public void Render(out Buffer<Vector4> colorBuffer, out Buffer<float> depthBuffer)
         {
             _renderingContext.SetWorldView(_camera.GetWorldViewMatrix());
 
@@ -30,22 +29,19 @@ namespace CpuRenderer3D
 
             colorBuffer = _renderingContext.ColorBuffer;
             depthBuffer = _renderingContext.DepthBuffer;
-            dataBuffer = _renderingContext.DataBuffer;
         }
 
         public void ClearBuffers()
         {
             _renderingContext.ColorBuffer.Clear();
             _renderingContext.DepthBuffer.Clear();
-            _renderingContext.DataBuffer.Clear();
         }
 
-        public static void Render(SceneNode scene, Camera camera, Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer, Buffer<int> dataBuffer)
+        public static void Render(SceneNode scene, Camera camera, Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer)
         {
             RenderingContext renderingContext = new RenderingContext(
                 colorBuffer,
                 depthBuffer,
-                dataBuffer,
                 worldView: camera.GetWorldViewMatrix(),
                 viewClip: camera.GetViewProjectionMatrix(),
                 clipScreen: CreateClipScreenMatrix(colorBuffer.Width, colorBuffer.Height));

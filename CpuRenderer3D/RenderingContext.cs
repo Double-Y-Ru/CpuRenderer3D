@@ -8,7 +8,6 @@ namespace CpuRenderer3D
     {
         public readonly Buffer<Vector4> ColorBuffer;
         public readonly Buffer<float> DepthBuffer;
-        public readonly Buffer<int> DataBuffer;
 
         public Matrix4x4 ModelWorld;// entity
         public Matrix4x4 WorldView;// camera
@@ -19,12 +18,11 @@ namespace CpuRenderer3D
         public Matrix4x4 ModelClip;// ModelWorld * WorldClip 
         public Matrix4x4 ModelScreen;// ClipScreen * ModelClip
 
-        public RenderingContext(Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer, Buffer<int> dataBuffer,
+        public RenderingContext(Buffer<Vector4> colorBuffer, Buffer<float> depthBuffer,
             Matrix4x4 worldView, Matrix4x4 viewClip, Matrix4x4 clipScreen)
         {
             ColorBuffer = colorBuffer;
             DepthBuffer = depthBuffer;
-            DataBuffer = dataBuffer;
 
             WorldView = worldView;
             ViewClip = viewClip;
