@@ -35,7 +35,7 @@ namespace CpuRenderer3D.Renderers
                 Vector4 point1Screen = Vector4.Transform(fragInput1.Position, renderingContext.ClipScreen);
                 Vector4 point2Screen = Vector4.Transform(fragInput2.Position, renderingContext.ClipScreen);
 
-                Rasterizer.DrawTriangleBary(point0Screen, fragInput0, point1Screen, fragInput1, point2Screen, fragInput2, _interpolator, clipBounds, TestPixel, SetPixel);
+                Rasterizer.DrawTriangle(point0Screen, fragInput0, point1Screen, fragInput1, point2Screen, fragInput2, _interpolator, clipBounds, TestPixel, SetPixel);
             }
 
             bool TestPixel(int x, int y, FragmentInput<TFragmentData> fragmentInput)
