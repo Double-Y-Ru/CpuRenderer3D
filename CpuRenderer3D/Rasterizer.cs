@@ -120,16 +120,19 @@ namespace CpuRenderer3D
             if (point0ScreenDivW.Y > point1ScreenDivW.Y)
             {
                 Swap(ref point0Data, ref point1Data);
+                Swap(ref point0Screen, ref point1Screen);
                 Swap(ref point0ScreenDivW, ref point1ScreenDivW);
             }
             if (point0ScreenDivW.Y > point2ScreenDivW.Y)
             {
                 Swap(ref point0Data, ref point2Data);
+                Swap(ref point0Screen, ref point2Screen);
                 Swap(ref point0ScreenDivW, ref point2ScreenDivW);
             }
             if (point1ScreenDivW.Y > point2ScreenDivW.Y)
             {
                 Swap(ref point1Data, ref point2Data);
+                Swap(ref point1Screen, ref point2Screen);
                 Swap(ref point1ScreenDivW, ref point2ScreenDivW);
             }
 
@@ -139,58 +142,48 @@ namespace CpuRenderer3D
 
             float leftX = point0ScreenDivW.X;
             float leftXDelta = (point2ScreenDivW.X - point0ScreenDivW.X) / (upperY - lowerY + 1);
-            TInterpolatedData leftFragInput = point0Data;
-            TInterpolatedData leftFragInputDelta = interpolator.Divide(interpolator.Subtract(point2Data, point0Data), upperY - lowerY + 1);
 
             float rightLowerX = point0ScreenDivW.X;
             float rightLowerXDelta = (point1ScreenDivW.X - point0ScreenDivW.X) / (rightY - lowerY + 1);
-            TInterpolatedData rightLowerFragInput = point0Data;
-            TInterpolatedData rightLowerFragInputDelta = interpolator.Divide(interpolator.Subtract(point1Data, point0Data), rightY - lowerY + 1);
 
             float rightUpperX = point1ScreenDivW.X;
             float rightUpperXDelta = (point2ScreenDivW.X - point1ScreenDivW.X) / (upperY - rightY + 1);
-            TInterpolatedData rightUpperFragInput = point1Data;
-            TInterpolatedData rightUpperFragInputDelta = interpolator.Divide(interpolator.Subtract(point2Data, point1Data), upperY - rightY + 1);
 
             for (int y = lowerY; y < rightY; ++y)
             {
-                DrawHorizontalLine((int)MathF.Round(leftX), (int)MathF.Round(rightLowerX), leftFragInput, rightLowerFragInput, y);
+                DrawHorizontalLine((int)MathF.Round(leftX), (int)MathF.Round(rightLowerX), y);
 
                 leftX += leftXDelta;
                 rightLowerX += rightLowerXDelta;
-
-                leftFragInput = interpolator.Add(leftFragInput, leftFragInputDelta);
-                rightLowerFragInput = interpolator.Add(rightLowerFragInput, rightLowerFragInputDelta);
             }
 
             for (int y = rightY; y <= upperY; ++y)
             {
-                DrawHorizontalLine((int)MathF.Round(leftX), (int)MathF.Round(rightUpperX), leftFragInput, rightUpperFragInput, y);
+                DrawHorizontalLine((int)MathF.Round(leftX), (int)MathF.Round(rightUpperX), y);
 
                 leftX += leftXDelta;
                 rightUpperX += rightUpperXDelta;
-
-                leftFragInput = interpolator.Add(leftFragInput, leftFragInputDelta);
-                rightUpperFragInput = interpolator.Add(rightUpperFragInput, rightUpperFragInputDelta);
             }
 
-            void DrawHorizontalLine(int startX, int endX, TInterpolatedData lineStart, TInterpolatedData lineEnd, int y)
+            void DrawHorizontalLine(int startX, int endX, int y)
             {
-                if (startX > endX)
-                {
-                    Swap(ref lineStart, ref lineEnd);
-                    Swap(ref startX, ref endX);
-                }
-
-                TInterpolatedData fragInput = lineStart;
-                TInterpolatedData fragInputDelta = interpolator.Divide(interpolator.Subtract(lineEnd, lineStart), endX - startX + 1);
+                if (startX > endX) Swap(ref startX, ref endX);
 
                 for (int x = startX; x <= endX; x++)
                 {
-                    if (testPixel(x, y, fragInput))
-                        setPixel(x, y, fragInput);
+                    Vector2 pointScreen = new Vector2(x, y);
 
-                    fragInput = interpolator.Add(fragInput, fragInputDelta);
+                    if (InBounds(bounds, pointScreen))
+                    {
+                        Vector3 pointBaryScreen = Barycentric(point0ScreenDivW, point1ScreenDivW, point2ScreenDivW, pointScreen);
+                        Vector3 pointBaryClip = new Vector3(pointBaryScreen.X / point0Screen.W, pointBaryScreen.Y / point1Screen.W, pointBaryScreen.Z / point2Screen.W);
+                        pointBaryClip = pointBaryClip / (pointBaryClip.X + pointBaryClip.Y + pointBaryClip.Z);
+
+                        TInterpolatedData interpolatedFragInput = interpolator.InterpolateBary(point0Data, point1Data, point2Data, pointBaryClip);
+
+                        if (testPixel(x, y, interpolatedFragInput))
+                            setPixel(x, y, interpolatedFragInput);
+                    }
                 }
             }
         }
@@ -333,6 +326,12 @@ namespace CpuRenderer3D
                                          MathF.Max(bounds.Max.Y, points[i].Y));
             }
             return bounds;
+        }
+
+        private static bool InBounds(Bounds bounds, Vector2 point)
+        {
+            return bounds.Min.X < point.X && point.X < bounds.Max.X
+                && bounds.Min.Y < point.Y && point.Y < bounds.Max.Y;
         }
 
         private static Bounds IntersectBounds(Bounds boundsA, Bounds boundsB)
