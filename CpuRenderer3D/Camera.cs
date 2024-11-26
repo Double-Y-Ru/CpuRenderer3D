@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace CpuRenderer3D
 {
@@ -24,7 +25,20 @@ namespace CpuRenderer3D
 
         public static Camera CreatePerspective(Transform transform, float aspect, float fieldOfViewRadians, float nearPlane, float farPlane)
         {
-            return new Camera(transform, Matrix4x4.CreatePerspectiveFieldOfView(fieldOfViewRadians, aspect, nearPlane, farPlane));
+            // return new Camera(transform, Matrix4x4.CreatePerspectiveFieldOfView(fieldOfViewRadians, aspect, nearPlane, farPlane)); // The difference is M44 == 0f
+
+            float yScale = (1.0f / MathF.Tan(fieldOfViewRadians / 2.0f)) * aspect;
+            float xScale = yScale / aspect;
+            float frustumLength = farPlane - nearPlane;
+
+            Matrix4x4 m = new Matrix4x4(
+                xScale, 0, 0, 0,
+                0, yScale, 0, 0,
+                0, 0, -((farPlane + nearPlane) / frustumLength), -1.0f,
+                0, 0, -((2.0f * nearPlane * farPlane) / frustumLength), 1f
+            );
+
+            return new Camera(transform, m);
         }
 
         public static Camera CreateOrthographic(Transform transform, float width, float height, float nearPlane, float farPlane)
