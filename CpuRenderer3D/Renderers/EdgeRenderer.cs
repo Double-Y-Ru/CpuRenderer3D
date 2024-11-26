@@ -6,11 +6,11 @@ namespace CpuRenderer3D.Renderers
     {
         private readonly Mesh _mesh;
         private readonly IShaderProgram<TFragmentData> _shaderProgram;
-        private readonly IInterpolator<TFragmentData> _interpolator;
+        private readonly IInterpolator<FragmentInput<TFragmentData>> _interpolator;
 
         private readonly FragmentInput<TFragmentData>[] _fragVerticesCache;
 
-        public EdgeRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<TFragmentData> interpolator)
+        public EdgeRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<FragmentInput<TFragmentData>> interpolator)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;

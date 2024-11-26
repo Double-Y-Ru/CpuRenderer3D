@@ -6,9 +6,9 @@ namespace CpuRenderer3D.Renderers
     {
         private readonly Mesh _mesh;
         private readonly IShaderProgram<TFragmentData> _shaderProgram;
-        private readonly IInterpolator<TFragmentData> _interpolator;
+        private readonly IInterpolator<FragmentInput<TFragmentData>> _interpolator;
 
-        public ShadedMeshRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<TFragmentData> interpolator)
+        public ShadedMeshRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<FragmentInput<TFragmentData>> interpolator)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
@@ -17,6 +17,8 @@ namespace CpuRenderer3D.Renderers
 
         public void Render(RenderingContext renderingContext)
         {
+            Bounds clipBounds = new Bounds(Vector2.Zero, new Vector2(renderingContext.ColorBuffer.Width, renderingContext.ColorBuffer.Height));
+
             for (int i = 0; i < _mesh.GetTriangles().Length; i++)
             {
                 Triangle triangle = _mesh.GetTriangles()[i];
@@ -29,9 +31,12 @@ namespace CpuRenderer3D.Renderers
                 FragmentInput<TFragmentData> fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
                 FragmentInput<TFragmentData> fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
 
-                Rasterizer.DrawTriangleBary(fragInput0, fragInput1, fragInput2, _interpolator, renderingContext.ClipScreen, TestPixel, SetPixel);
-            }
+                Vector4 point0Screen = Vector4.Transform(fragInput0.Position, renderingContext.ClipScreen);
+                Vector4 point1Screen = Vector4.Transform(fragInput1.Position, renderingContext.ClipScreen);
+                Vector4 point2Screen = Vector4.Transform(fragInput2.Position, renderingContext.ClipScreen);
 
+                Rasterizer.DrawTriangleBary(point0Screen, fragInput0, point1Screen, fragInput1, point2Screen, fragInput2, _interpolator, clipBounds, TestPixel, SetPixel);
+            }
 
             bool TestPixel(int x, int y, FragmentInput<TFragmentData> fragmentInput)
             {

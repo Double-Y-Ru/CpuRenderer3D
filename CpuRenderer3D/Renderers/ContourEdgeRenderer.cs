@@ -10,12 +10,12 @@ namespace CpuRenderer3D.Renderers
 
         private readonly Mesh _mesh;
         private readonly IShaderProgram<TFragmentData> _shaderProgram;
-        private readonly IInterpolator<TFragmentData> _interpolator;
+        private readonly IInterpolator<FragmentInput<TFragmentData>> _interpolator;
 
         private readonly Dictionary<TriangleVertexKey, FragmentInput<TFragmentData>> _triangleVerticesCache;
         private readonly Vector3[] _triangleNormals;
 
-        public ContourEdgeRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<TFragmentData> interpolator)
+        public ContourEdgeRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<FragmentInput<TFragmentData>> interpolator)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;

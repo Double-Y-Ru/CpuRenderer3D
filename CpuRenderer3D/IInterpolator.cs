@@ -2,12 +2,12 @@
 
 namespace CpuRenderer3D
 {
-    public interface IInterpolator<TFragmentData> where TFragmentData : struct
+    public interface IInterpolator<TInterpolatedData> where TInterpolatedData : struct
     {
-        FragmentInput<TFragmentData> Add(FragmentInput<TFragmentData> a, FragmentInput<TFragmentData> b);
-        FragmentInput<TFragmentData> Subtract(FragmentInput<TFragmentData> a, FragmentInput<TFragmentData> b);
-        FragmentInput<TFragmentData> Multiply(FragmentInput<TFragmentData> a, float f);
-        FragmentInput<TFragmentData> Divide(FragmentInput<TFragmentData> a, float f);
-        FragmentInput<TFragmentData> InterpolateBary(FragmentInput<TFragmentData> point0, FragmentInput<TFragmentData> point1, FragmentInput<TFragmentData> point2, Vector3 bary);
+        TInterpolatedData Add(TInterpolatedData a, TInterpolatedData b);
+        TInterpolatedData Subtract(TInterpolatedData a, TInterpolatedData b);
+        TInterpolatedData Multiply(TInterpolatedData a, float f);
+        TInterpolatedData Divide(TInterpolatedData a, float f);
+        TInterpolatedData InterpolateBary(TInterpolatedData point0, TInterpolatedData point1, TInterpolatedData point2, Vector3 bary);
     }
 }

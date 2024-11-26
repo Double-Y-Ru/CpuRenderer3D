@@ -3,17 +3,15 @@ using System.Numerics;
 
 namespace CpuRenderer3D
 {
+    public record struct Bounds(Vector2 Min, Vector2 Max);
+
     public static class Rasterizer
     {
         public delegate bool TestPixel<T>(int x, int y, T pixel);
         public delegate void SetPixel<T>(int x, int y, T pixel);
 
-        public static void DrawTriangleBary<TFragmentData>(FragmentInput<TFragmentData> point0Clip, FragmentInput<TFragmentData> point1Clip, FragmentInput<TFragmentData> point2Clip, IInterpolator<TFragmentData> interpolator, Matrix4x4 clipScreen, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
+        public static void DrawTriangleBary<TInterpolatedData>(Vector4 point0Screen, TInterpolatedData point0Data, Vector4 point1Screen, TInterpolatedData point1Data, Vector4 point2Screen, TInterpolatedData point2Data, IInterpolator<TInterpolatedData> interpolator, Bounds bounds, TestPixel<TInterpolatedData> testPixel, SetPixel<TInterpolatedData> setPixel) where TInterpolatedData : struct
         {
-            Vector4 point0Screen = Vector4.Transform(point0Clip.Position, clipScreen);
-            Vector4 point1Screen = Vector4.Transform(point1Clip.Position, clipScreen);
-            Vector4 point2Screen = Vector4.Transform(point2Clip.Position, clipScreen);
-
             Vector2 point0ScreenDivW = point0Screen.XYDivW();
             Vector2 point1ScreenDivW = point1Screen.XYDivW();
             Vector2 point2ScreenDivW = point2Screen.XYDivW();
@@ -24,10 +22,11 @@ namespace CpuRenderer3D
 
             if (triangleNormalZ < 0) return;
 
-            GetBoundingBox(new Vector2[] { point0ScreenDivW, point1ScreenDivW, point2ScreenDivW }, new Vector2(2f * clipScreen.M41, 2f * clipScreen.M42), out Vector2 bboxmin, out Vector2 bboxmax);
+            Bounds pointBounds = GetBounds(point0ScreenDivW, point1ScreenDivW, point2ScreenDivW);
+            bounds = IntersectBounds(bounds, pointBounds);
 
-            for (int y = (int)bboxmin.Y; y <= (int)bboxmax.Y; y++)
-                for (int x = (int)bboxmin.X; x <= (int)bboxmax.X; x++)
+            for (int y = (int)bounds.Min.Y; y <= (int)bounds.Max.Y; y++)
+                for (int x = (int)bounds.Min.X; x <= (int)bounds.Max.X; x++)
                 {
                     Vector2 pointScreen = new Vector2(x, y);
                     Vector3 pointBaryScreen = Barycentric(point0ScreenDivW, point1ScreenDivW, point2ScreenDivW, pointScreen);
@@ -36,7 +35,7 @@ namespace CpuRenderer3D
 
                     if (pointBaryScreen.X < 0 || pointBaryScreen.Y < 0 || pointBaryScreen.Z < 0) continue;
 
-                    FragmentInput<TFragmentData> interpolatedFragInput = interpolator.InterpolateBary(point0Clip, point1Clip, point2Clip, pointBaryClip);
+                    TInterpolatedData interpolatedFragInput = interpolator.InterpolateBary(point0Data, point1Data, point2Data, pointBaryClip);
 
                     if (testPixel(x, y, interpolatedFragInput))
                         setPixel(x, y, interpolatedFragInput);
@@ -106,7 +105,7 @@ namespace CpuRenderer3D
             }
         }
 
-        public static void DrawTriangle<TFragmentData>(FragmentInput<TFragmentData> point0Clip, FragmentInput<TFragmentData> point1Clip, FragmentInput<TFragmentData> point2Clip, IInterpolator<TFragmentData> interpolator, Matrix4x4 clipScreen, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
+        public static void DrawTriangle<TFragmentData>(FragmentInput<TFragmentData> point0Clip, FragmentInput<TFragmentData> point1Clip, FragmentInput<TFragmentData> point2Clip, IInterpolator<FragmentInput<TFragmentData>> interpolator, Matrix4x4 clipScreen, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
         {
             Vector4 point0Screen = Vector4.Transform(point0Clip.Position, clipScreen);
             Vector4 point1Screen = Vector4.Transform(point1Clip.Position, clipScreen);
@@ -263,7 +262,7 @@ namespace CpuRenderer3D
             }
         }
 
-        public static void DrawLine<TFragmentData>(FragmentInput<TFragmentData> f0, FragmentInput<TFragmentData> f1, IInterpolator<TFragmentData> interpolator, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
+        public static void DrawLine<TFragmentData>(FragmentInput<TFragmentData> f0, FragmentInput<TFragmentData> f1, IInterpolator<FragmentInput<TFragmentData>> interpolator, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
         {
             bool isGentle = true;
 
@@ -323,19 +322,30 @@ namespace CpuRenderer3D
             }
         }
 
-        private static void GetBoundingBox(Vector2[] points, Vector2 clamp, out Vector2 bboxmin, out Vector2 bboxmax)
+        private static Bounds GetBounds(params Vector2[] points)
         {
-            bboxmin = clamp;
-            bboxmax = new Vector2(0f, 0f);
+            if (points.Length == 0) return new Bounds();
 
-            for (int i = 0; i < points.Length; i++)
+            Bounds bounds = new Bounds(points[0], points[0]);
+
+            for (int i = 1; i < points.Length; i++)
             {
-                bboxmin.X = MathF.Max(0, MathF.Min(bboxmin.X, points[i].X));
-                bboxmax.X = MathF.Min(clamp.X, MathF.Max(bboxmax.X, points[i].X));
+                bounds.Min = new Vector2(MathF.Min(bounds.Min.X, points[i].X),
+                                         MathF.Min(bounds.Min.Y, points[i].Y));
 
-                bboxmin.Y = MathF.Max(0, MathF.Min(bboxmin.Y, points[i].Y));
-                bboxmax.Y = MathF.Min(clamp.Y, MathF.Max(bboxmax.Y, points[i].Y));
+                bounds.Max = new Vector2(MathF.Max(bounds.Max.X, points[i].X),
+                                         MathF.Max(bounds.Max.Y, points[i].Y));
             }
+            return bounds;
+        }
+
+        private static Bounds IntersectBounds(Bounds boundsA, Bounds boundsB)
+        {
+            return new Bounds(
+                Min: new Vector2(MathF.Max(boundsA.Min.X, boundsB.Min.X),
+                                 MathF.Max(boundsA.Min.Y, boundsB.Min.Y)),
+                Max: new Vector2(MathF.Min(boundsA.Max.X, boundsB.Max.X),
+                                 MathF.Min(boundsA.Max.Y, boundsB.Max.Y)));
         }
 
         private static Vector3 Barycentric(Vector2 point0, Vector2 point1, Vector2 point2, Vector2 P)

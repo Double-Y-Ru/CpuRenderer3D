@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace CpuRenderer3D.Shaders
 {
-    public class LitShaderProgram : IShaderProgram<LitFragmentData>, IInterpolator<LitFragmentData>
+    public class LitShaderProgram : IShaderProgram<LitFragmentData>, IInterpolator<FragmentInput<LitFragmentData>>
     {
         public Buffer<Vector4> DiffuseTexture;
         public Buffer<float> SpecularTexture;
