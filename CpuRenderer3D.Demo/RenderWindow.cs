@@ -17,6 +17,8 @@ namespace CpuRenderer3D.Demo
         private readonly Buffer<float> _depthBuffer;
         private readonly Buffer<int> _dataBuffer;
 
+        private bool _shouldShowDepth = false;
+
         private readonly float[] _vertices =
         {
             //Position    | Texture coordinates
@@ -110,6 +112,12 @@ namespace CpuRenderer3D.Demo
             _dirty |= RotateCamera(_camera);
             _dirty |= KeyboardState.IsKeyDown(Keys.Space);
 
+            if (KeyboardState.IsKeyPressed(Keys.Z))
+            {
+                _shouldShowDepth = !_shouldShowDepth;
+                _dirty = true;
+            }
+
             if (KeyboardState.IsKeyDown(Keys.Escape)) Close();
         }
 
@@ -131,7 +139,11 @@ namespace CpuRenderer3D.Demo
             {
                 using (BoundGlTexture texture = _texture.Bind())
                 {
-                    texture.UpdateImage(_colorBuffer);
+
+                    if (_shouldShowDepth)
+                        texture.UpdateImage(_depthBuffer);
+                    else
+                        texture.UpdateImage(_colorBuffer);
 
                     _shaderGl!.Use();
 

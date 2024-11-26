@@ -45,6 +45,12 @@ namespace CpuRenderer3D.Demo.GlObjects
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
 
+        public void UpdateImage(Buffer<float> buffer)
+        {
+            GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, buffer.Width, buffer.Height, PixelFormat.Luminance, PixelType.Float, buffer.GetData());
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        }
+
         public void UpdateImage(Buffer<int> buffer)
         {
             GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, buffer.Width, buffer.Height, PixelFormat.RgbaInteger, PixelType.UnsignedInt, buffer.GetData());
