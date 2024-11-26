@@ -106,32 +106,63 @@ namespace CpuRenderer3D
             }
         }
 
-        public static void DrawTriangle<TFragmentData>(FragmentInput<TFragmentData> f0, FragmentInput<TFragmentData> f1, FragmentInput<TFragmentData> f2, IInterpolator<TFragmentData> interpolator, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
+        public static void DrawTriangle<TFragmentData>(FragmentInput<TFragmentData> point0Clip, FragmentInput<TFragmentData> point1Clip, FragmentInput<TFragmentData> point2Clip, IInterpolator<TFragmentData> interpolator, Matrix4x4 clipScreen, TestPixel<FragmentInput<TFragmentData>> testPixel, SetPixel<FragmentInput<TFragmentData>> setPixel) where TFragmentData : struct
         {
-            if (f0.Position.Y == f1.Position.Y
-             && f0.Position.Y == f2.Position.Y)
-                return;
+            Vector4 point0Screen = Vector4.Transform(point0Clip.Position, clipScreen);
+            Vector4 point1Screen = Vector4.Transform(point1Clip.Position, clipScreen);
+            Vector4 point2Screen = Vector4.Transform(point2Clip.Position, clipScreen);
 
-            if (f0.Position.Y > f1.Position.Y) Swap(ref f0, ref f1);
-            if (f0.Position.Y > f2.Position.Y) Swap(ref f0, ref f2);
-            if (f1.Position.Y > f2.Position.Y) Swap(ref f1, ref f2);
+            Vector2 point0ScreenDivW = point0Screen.XYDivW();
+            Vector2 point1ScreenDivW = point1Screen.XYDivW();
+            Vector2 point2ScreenDivW = point2Screen.XYDivW();
 
-            int lowerY = (int)MathF.Round(f0.Position.Y);
-            int rightY = (int)MathF.Round(f1.Position.Y);
-            int upperY = (int)MathF.Round(f2.Position.Y);
+            float triangleNormalZ = VectorExtenstions.Cross(
+                point0ScreenDivW - point1ScreenDivW,
+                point0ScreenDivW - point2ScreenDivW);
 
-            FragmentInput<TFragmentData> leftFragInput = f0;
-            FragmentInput<TFragmentData> leftFragInputDelta = interpolator.Divide(interpolator.Subtract(f2, f0), upperY - lowerY + 1);
+            if (triangleNormalZ < 0) return;
 
-            FragmentInput<TFragmentData> rightLowerFragInput = f0;
-            FragmentInput<TFragmentData> rightLowerFragInputDelta = interpolator.Divide(interpolator.Subtract(f1, f0), rightY - lowerY + 1);
+            if (point0ScreenDivW.Y > point1ScreenDivW.Y)
+            {
+                Swap(ref point0Clip, ref point1Clip);
+                Swap(ref point0ScreenDivW, ref point1ScreenDivW);
+            }
+            if (point0ScreenDivW.Y > point2ScreenDivW.Y)
+            {
+                Swap(ref point0Clip, ref point2Clip);
+                Swap(ref point0ScreenDivW, ref point2ScreenDivW);
+            }
+            if (point1ScreenDivW.Y > point2ScreenDivW.Y)
+            {
+                Swap(ref point1Clip, ref point2Clip);
+                Swap(ref point1ScreenDivW, ref point2ScreenDivW);
+            }
 
-            FragmentInput<TFragmentData> rightUpperFragInput = f1;
-            FragmentInput<TFragmentData> rightUpperFragInputDelta = interpolator.Divide(interpolator.Subtract(f2, f1), upperY - rightY + 1);
+            int lowerY = (int)MathF.Round(point0ScreenDivW.Y);
+            int rightY = (int)MathF.Round(point1ScreenDivW.Y);
+            int upperY = (int)MathF.Round(point2ScreenDivW.Y);
+
+            float leftX = point0ScreenDivW.X;
+            float leftXDelta = (point2ScreenDivW.X - point0ScreenDivW.X) / (upperY - lowerY + 1);
+            FragmentInput<TFragmentData> leftFragInput = point0Clip;
+            FragmentInput<TFragmentData> leftFragInputDelta = interpolator.Divide(interpolator.Subtract(point2Clip, point0Clip), upperY - lowerY + 1);
+
+            float rightLowerX = point0ScreenDivW.X;
+            float rightLowerXDelta = (point1ScreenDivW.X - point0ScreenDivW.X) / (rightY - lowerY + 1);
+            FragmentInput<TFragmentData> rightLowerFragInput = point0Clip;
+            FragmentInput<TFragmentData> rightLowerFragInputDelta = interpolator.Divide(interpolator.Subtract(point1Clip, point0Clip), rightY - lowerY + 1);
+
+            float rightUpperX = point1ScreenDivW.X;
+            float rightUpperXDelta = (point2ScreenDivW.X - point1ScreenDivW.X) / (upperY - rightY + 1);
+            FragmentInput<TFragmentData> rightUpperFragInput = point1Clip;
+            FragmentInput<TFragmentData> rightUpperFragInputDelta = interpolator.Divide(interpolator.Subtract(point2Clip, point1Clip), upperY - rightY + 1);
 
             for (int y = lowerY; y < rightY; ++y)
             {
-                DrawHorizontalLine(leftFragInput, rightLowerFragInput, y);
+                DrawHorizontalLine((int)MathF.Round(leftX), (int)MathF.Round(rightLowerX), leftFragInput, rightLowerFragInput, y);
+
+                leftX += leftXDelta;
+                rightLowerX += rightLowerXDelta;
 
                 leftFragInput = interpolator.Add(leftFragInput, leftFragInputDelta);
                 rightLowerFragInput = interpolator.Add(rightLowerFragInput, rightLowerFragInputDelta);
@@ -139,24 +170,27 @@ namespace CpuRenderer3D
 
             for (int y = rightY; y <= upperY; ++y)
             {
-                DrawHorizontalLine(leftFragInput, rightUpperFragInput, y);
+                DrawHorizontalLine((int)MathF.Round(leftX), (int)MathF.Round(rightUpperX), leftFragInput, rightUpperFragInput, y);
+
+                leftX += leftXDelta;
+                rightUpperX += rightUpperXDelta;
 
                 leftFragInput = interpolator.Add(leftFragInput, leftFragInputDelta);
                 rightUpperFragInput = interpolator.Add(rightUpperFragInput, rightUpperFragInputDelta);
             }
 
-            void DrawHorizontalLine(FragmentInput<TFragmentData> lineStart, FragmentInput<TFragmentData> lineEnd, int y)
+            void DrawHorizontalLine(int startX, int endX, FragmentInput<TFragmentData> lineStart, FragmentInput<TFragmentData> lineEnd, int y)
             {
-                if (lineStart.Position.X > lineEnd.Position.X)
+                if (startX > endX)
+                {
                     Swap(ref lineStart, ref lineEnd);
-
-                int lineStartX = (int)MathF.Round(lineStart.Position.X);
-                int lineEndX = (int)MathF.Round(lineEnd.Position.X);
+                    Swap(ref startX, ref endX);
+                }
 
                 FragmentInput<TFragmentData> fragInput = lineStart;
-                FragmentInput<TFragmentData> fragInputDelta = interpolator.Divide(interpolator.Subtract(lineEnd, lineStart), lineEndX - lineStartX + 1);
+                FragmentInput<TFragmentData> fragInputDelta = interpolator.Divide(interpolator.Subtract(lineEnd, lineStart), endX - startX + 1);
 
-                for (int x = lineStartX; x <= lineEndX; x++)
+                for (int x = startX; x <= endX; x++)
                 {
                     if (testPixel(x, y, fragInput))
                         setPixel(x, y, fragInput);

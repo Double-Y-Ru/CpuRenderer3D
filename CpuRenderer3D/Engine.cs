@@ -16,7 +16,7 @@ namespace CpuRenderer3D
                 new Buffer<int>(bufferWidth, bufferHeight, 0),
                 worldView: camera.GetWorldViewMatrix(),
                 viewClip: camera.GetViewProjectionMatrix(),
-                clipScreen: CreateProjectionClipMatrix(bufferWidth, bufferHeight));
+                clipScreen: CreateClipScreenMatrix(bufferWidth, bufferHeight));
 
             _scene = scene;
             _camera = camera;
@@ -48,7 +48,7 @@ namespace CpuRenderer3D
                 dataBuffer,
                 worldView: camera.GetWorldViewMatrix(),
                 viewClip: camera.GetViewProjectionMatrix(),
-                clipScreen: CreateProjectionClipMatrix(colorBuffer.Width, colorBuffer.Height));
+                clipScreen: CreateClipScreenMatrix(colorBuffer.Width, colorBuffer.Height));
 
             RenderRecursive(scene, renderingContext);
         }
@@ -64,7 +64,7 @@ namespace CpuRenderer3D
                 RenderRecursive(child, renderingContext);
         }
 
-        private static Matrix4x4 CreateProjectionClipMatrix(int bufferWidth, int bufferHeight)
+        private static Matrix4x4 CreateClipScreenMatrix(int bufferWidth, int bufferHeight)
         {
             float halfWidth = 0.5f * bufferWidth;
             float halfHeight = 0.5f * bufferHeight;
