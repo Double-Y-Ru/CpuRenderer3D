@@ -78,7 +78,7 @@ namespace CpuRenderer3D.Renderers
                     Vector3 triangleVertex1Screen = Vector3.Transform(triangleVertex1ClipDivW, renderingContext.ClipScreen);
                     Vector3 triangleVertex2Screen = Vector3.Transform(triangleVertex2ClipDivW, renderingContext.ClipScreen);
 
-                    Drawer.DrawTriangle(triangleVertex0Screen, triangleVertex1Screen, triangleVertex2Screen, _fillColor, TestDepth, SetDepthAndMask, SetColor);
+                    Rasterizer.DrawTriangle(triangleVertex0Screen, triangleVertex1Screen, triangleVertex2Screen, _fillColor, TestDepth, SetDepthAndMask, SetColor);
                 }
             }
 
@@ -143,7 +143,7 @@ namespace CpuRenderer3D.Renderers
                     Vector3 triangleVertex0Screen = Vector3.Transform(triangleVertex0ClipDivW, renderingContext.ClipScreen);
                     Vector3 triangleVertex1Screen = Vector3.Transform(triangleVertex1ClipDivW, renderingContext.ClipScreen);
 
-                    Drawer.DrawLine(triangleVertex0Screen, triangleVertex1Screen, _contourColor, TestDepthAndMask, (x, y, d) => { }, SetColor);
+                    Rasterizer.DrawLine(triangleVertex0Screen, triangleVertex1Screen, _contourColor, TestDepthAndMask, (x, y, d) => { }, SetColor);
                 }
             }
 

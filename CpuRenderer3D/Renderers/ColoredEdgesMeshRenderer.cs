@@ -50,15 +50,15 @@ namespace CpuRenderer3D.Renderers
                     triangleVertex1Proj = Vector3.Transform(triangleVertex1Proj, renderingContext.ClipScreen);
                     triangleVertex2Proj = Vector3.Transform(triangleVertex2Proj, renderingContext.ClipScreen);
 
-                    Drawer.DrawTriangle(triangleVertex0Proj, triangleVertex1Proj, triangleVertex2Proj, _fillColor, TestDepth, SetDepth, SetColor);
+                    Rasterizer.DrawTriangle(triangleVertex0Proj, triangleVertex1Proj, triangleVertex2Proj, _fillColor, TestDepth, SetDepth, SetColor);
 
                     triangleVertex0Proj -= 0.0001f * Vector3.UnitZ;
                     triangleVertex1Proj -= 0.0001f * Vector3.UnitZ;
                     triangleVertex2Proj -= 0.0001f * Vector3.UnitZ;
 
-                    Drawer.DrawLine(triangleVertex0Proj, triangleVertex1Proj, _edgeColor, TestDepth, SetDepth, SetColor);
-                    Drawer.DrawLine(triangleVertex1Proj, triangleVertex2Proj, _edgeColor, TestDepth, SetDepth, SetColor);
-                    Drawer.DrawLine(triangleVertex2Proj, triangleVertex0Proj, _edgeColor, TestDepth, SetDepth, SetColor);
+                    Rasterizer.DrawLine(triangleVertex0Proj, triangleVertex1Proj, _edgeColor, TestDepth, SetDepth, SetColor);
+                    Rasterizer.DrawLine(triangleVertex1Proj, triangleVertex2Proj, _edgeColor, TestDepth, SetDepth, SetColor);
+                    Rasterizer.DrawLine(triangleVertex2Proj, triangleVertex0Proj, _edgeColor, TestDepth, SetDepth, SetColor);
                 }
             }
 

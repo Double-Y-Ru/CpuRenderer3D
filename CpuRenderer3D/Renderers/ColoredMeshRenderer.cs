@@ -48,7 +48,7 @@ namespace CpuRenderer3D.Renderers
                     triangleVertex1Proj = Vector3.Transform(triangleVertex1Proj, renderingContext.ClipScreen);
                     triangleVertex2Proj = Vector3.Transform(triangleVertex2Proj, renderingContext.ClipScreen);
 
-                    Drawer.DrawTriangle(triangleVertex0Proj, triangleVertex1Proj, triangleVertex2Proj, _fillColor, TestDepth, SetDepth, SetColor);
+                    Rasterizer.DrawTriangle(triangleVertex0Proj, triangleVertex1Proj, triangleVertex2Proj, _fillColor, TestDepth, SetDepth, SetColor);
                 }
             }
 

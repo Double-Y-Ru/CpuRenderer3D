@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace CpuRenderer3D
 {
-    public static class Drawer
+    public static class Rasterizer
     {
         public delegate bool TestPixel<T>(int x, int y, T pixel);
         public delegate void SetPixel<T>(int x, int y, T pixel);

@@ -29,7 +29,7 @@ namespace CpuRenderer3D.Renderers
                 FragmentInput<TFragmentData> fragInput1 = _shaderProgram.ComputeVertex(vertInput1, renderingContext);
                 FragmentInput<TFragmentData> fragInput2 = _shaderProgram.ComputeVertex(vertInput2, renderingContext);
 
-                Drawer.DrawTriangleBary(fragInput0, fragInput1, fragInput2, _interpolator, renderingContext.ClipScreen, TestPixel, SetPixel);
+                Rasterizer.DrawTriangleBary(fragInput0, fragInput1, fragInput2, _interpolator, renderingContext.ClipScreen, TestPixel, SetPixel);
             }
 
 

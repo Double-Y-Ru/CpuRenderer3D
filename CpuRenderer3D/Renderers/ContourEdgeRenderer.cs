@@ -99,7 +99,7 @@ namespace CpuRenderer3D.Renderers
                 fragInput0.Position = Vector4.Transform(fragInput0.Position, renderingContext.ClipScreen) - Vector4.UnitZ * 0.0001f;
                 fragInput1.Position = Vector4.Transform(fragInput1.Position, renderingContext.ClipScreen) - Vector4.UnitZ * 0.0001f;
 
-                Drawer.DrawLine(fragInput0, fragInput1, _interpolator, TestPixel, SetPixel);
+                Rasterizer.DrawLine(fragInput0, fragInput1, _interpolator, TestPixel, SetPixel);
             }
 
             bool TestPixel(int x, int y, FragmentInput<TFragmentData> fragInput)
