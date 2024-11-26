@@ -3,8 +3,6 @@ using System.Numerics;
 
 namespace CpuRenderer3D
 {
-    public record struct Bounds(Vector2 Min, Vector2 Max);
-
     public static class Rasterizer
     {
         public delegate bool TestPixel<T>(int x, int y, T pixel);
@@ -22,8 +20,8 @@ namespace CpuRenderer3D
 
             if (triangleNormalZ < 0) return;
 
-            Bounds pointBounds = GetBounds(point0ScreenDivW, point1ScreenDivW, point2ScreenDivW);
-            bounds = IntersectBounds(bounds, pointBounds);
+            Bounds pointBounds = Bounds.FromPoints(point0ScreenDivW, point1ScreenDivW, point2ScreenDivW);
+            bounds = Bounds.Intersect(bounds, pointBounds);
 
             for (int y = (int)bounds.Min.Y; y <= (int)bounds.Max.Y; y++)
                 for (int x = (int)bounds.Min.X; x <= (int)bounds.Max.X; x++)
@@ -169,11 +167,11 @@ namespace CpuRenderer3D
             {
                 if (startX > endX) Swap(ref startX, ref endX);
 
-                for (int x = startX; x <= endX; x++)
+                for (int x = Math.Max((int)(bounds.Min.X), startX); x <= Math.Min(endX, (int)(bounds.Max.X)); x++)
                 {
                     Vector2 pointScreen = new Vector2(x, y);
 
-                    if (InBounds(bounds, pointScreen))
+                    if (bounds.IsInside(pointScreen))
                     {
                         Vector3 pointBaryScreen = Barycentric(point0ScreenDivW, point1ScreenDivW, point2ScreenDivW, pointScreen);
                         Vector3 pointBaryClip = new Vector3(pointBaryScreen.X / point0Screen.W, pointBaryScreen.Y / point1Screen.W, pointBaryScreen.Z / point2Screen.W);
@@ -309,38 +307,6 @@ namespace CpuRenderer3D
 
                 fragInput = interpolator.Add(fragInput, fragInputDelta);
             }
-        }
-
-        private static Bounds GetBounds(params Vector2[] points)
-        {
-            if (points.Length == 0) return new Bounds();
-
-            Bounds bounds = new Bounds(points[0], points[0]);
-
-            for (int i = 1; i < points.Length; i++)
-            {
-                bounds.Min = new Vector2(MathF.Min(bounds.Min.X, points[i].X),
-                                         MathF.Min(bounds.Min.Y, points[i].Y));
-
-                bounds.Max = new Vector2(MathF.Max(bounds.Max.X, points[i].X),
-                                         MathF.Max(bounds.Max.Y, points[i].Y));
-            }
-            return bounds;
-        }
-
-        private static bool InBounds(Bounds bounds, Vector2 point)
-        {
-            return bounds.Min.X < point.X && point.X < bounds.Max.X
-                && bounds.Min.Y < point.Y && point.Y < bounds.Max.Y;
-        }
-
-        private static Bounds IntersectBounds(Bounds boundsA, Bounds boundsB)
-        {
-            return new Bounds(
-                Min: new Vector2(MathF.Max(boundsA.Min.X, boundsB.Min.X),
-                                 MathF.Max(boundsA.Min.Y, boundsB.Min.Y)),
-                Max: new Vector2(MathF.Min(boundsA.Max.X, boundsB.Max.X),
-                                 MathF.Min(boundsA.Max.Y, boundsB.Max.Y)));
         }
 
         private static Vector3 Barycentric(Vector2 point0, Vector2 point1, Vector2 point2, Vector2 P)
