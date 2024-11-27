@@ -103,7 +103,7 @@ namespace CpuRenderer3D
             }
         }
 
-        public static void DrawTriangle<TInterpolatedData>(Vector4 point0Screen, TInterpolatedData point0Data, Vector4 point1Screen, TInterpolatedData point1Data, Vector4 point2Screen, TInterpolatedData point2Data, IInterpolator<TInterpolatedData> interpolator, Bounds bounds, TestPixel<TInterpolatedData> testPixel, SetPixel<TInterpolatedData> setPixel) where TInterpolatedData : struct
+        public static void DrawTriangle<TInterpolatedData>(Vector4 point0Screen, TInterpolatedData point0Data, Vector4 point1Screen, TInterpolatedData point1Data, Vector4 point2Screen, TInterpolatedData point2Data, IInterpolator<TInterpolatedData> interpolator, Bounds bounds, TestPixel<float> testDepth, SetPixel<float> setDepth, SetPixel<TInterpolatedData> setPixel) where TInterpolatedData : struct
         {
             Vector2 point0ScreenDivW = point0Screen.XYDivW();
             Vector2 point1ScreenDivW = point1Screen.XYDivW();
@@ -179,8 +179,13 @@ namespace CpuRenderer3D
 
                         TInterpolatedData interpolatedFragInput = interpolator.InterpolateBary(point0Data, point1Data, point2Data, pointBaryClip);
 
-                        if (testPixel(x, y, interpolatedFragInput))
+                        float screenDepth = Vector3.Dot(new Vector3(point0Screen.Z / point0Screen.W, point1Screen.Z / point1Screen.W, point2Screen.Z / point2Screen.W), pointBaryScreen);
+
+                        if (testDepth(x, y, screenDepth))
+                        {
+                            setDepth(x, y, screenDepth);
                             setPixel(x, y, interpolatedFragInput);
+                        }
                     }
                 }
             }

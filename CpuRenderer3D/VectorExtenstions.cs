@@ -4,6 +4,11 @@ namespace CpuRenderer3D
 {
     public static class VectorExtenstions
     {
+        public static Vector2 XY(this Vector3 vec3)
+        {
+            return new Vector2(vec3.X, vec3.Y);
+        }
+
         public static Vector2 XY(this Vector4 vec4)
         {
             return new Vector2(vec4.X, vec4.Y);

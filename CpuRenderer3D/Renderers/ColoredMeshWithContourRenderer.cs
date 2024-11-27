@@ -7,7 +7,6 @@ namespace CpuRenderer3D.Renderers
         private readonly Mesh _mesh;
         private readonly Vector4 _fillColor;
         private readonly Vector4 _contourColor;
-
         private Buffer<bool>? _mask;
 
         private readonly Vector3[] _vertexCache;
@@ -82,9 +81,9 @@ namespace CpuRenderer3D.Renderers
                 }
             }
 
-            for (int y = minY - 1; y < maxY; ++y)
+            for (int y = minY - 1; y <= maxY; ++y)
             {
-                for (int x = minX - 1; x < maxX; ++x)
+                for (int x = minX - 1; x <= maxX; ++x)
                 {
                     if (!_mask.TryGet(x, y, out bool centerIsInside)) continue;
 

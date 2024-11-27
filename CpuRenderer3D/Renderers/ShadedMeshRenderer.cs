@@ -35,18 +35,21 @@ namespace CpuRenderer3D.Renderers
                 Vector4 point1Screen = Vector4.Transform(fragInput1.Position, renderingContext.ClipScreen);
                 Vector4 point2Screen = Vector4.Transform(fragInput2.Position, renderingContext.ClipScreen);
 
-                Rasterizer.DrawTriangle(point0Screen, fragInput0, point1Screen, fragInput1, point2Screen, fragInput2, _interpolator, clipBounds, TestPixel, SetPixel);
+                Rasterizer.DrawTriangle(point0Screen, fragInput0, point1Screen, fragInput1, point2Screen, fragInput2, _interpolator, clipBounds, TestDepth, SetDepth, SetPixel);
             }
 
-            bool TestPixel(int x, int y, FragmentInput<TFragmentData> fragmentInput)
+            bool TestDepth(int x, int y, float depth)
             {
-                return renderingContext.DepthBuffer.TryGet(x, y, out float depthFromBuffer) && fragmentInput.Position.Z <= depthFromBuffer;
+                return renderingContext.DepthBuffer.TryGet(x, y, out float depthFromBuffer) && depth <= depthFromBuffer;
+            }
+
+            void SetDepth(int x, int y, float depth)
+            {
+                renderingContext.DepthBuffer.Set(x, y, depth);
             }
 
             void SetPixel(int x, int y, FragmentInput<TFragmentData> fragmentInput)
             {
-                renderingContext.DepthBuffer.Set(x, y, fragmentInput.Position.Z);
-
                 Vector4 color = _shaderProgram.ComputeColor(fragmentInput, renderingContext);
                 renderingContext.ColorBuffer.Set(x, y, color);
             }

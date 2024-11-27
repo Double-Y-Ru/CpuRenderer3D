@@ -5,7 +5,6 @@ namespace CpuRenderer3D.Renderers
 {
     public class ContourEdgeRenderer<TFragmentData> : IRenderer where TFragmentData : struct
     {
-        private record struct FragVertex(int TriangleId, FragmentInput<TFragmentData> FragInput);
         private record struct TriangleVertexKey(int TriangleId, int VertexId);
 
         private readonly Mesh _mesh;

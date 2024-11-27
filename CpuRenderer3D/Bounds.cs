@@ -28,6 +28,22 @@ namespace CpuRenderer3D
                 && Min.Y < point.Y && point.Y < Max.Y;
         }
 
+        public void Expand(Vector2 point)
+        {
+            Min = new Vector2(MathF.Min(Min.X, point.X),
+                              MathF.Min(Min.Y, point.Y));
+            Max = new Vector2(MathF.Max(Max.X, point.X),
+                              MathF.Max(Max.Y, point.Y));
+        }
+
+        public void Expand(float x, float y)
+        {
+            Min = new Vector2(MathF.Min(Min.X, x),
+                              MathF.Min(Min.Y, y));
+            Max = new Vector2(MathF.Max(Max.X, x),
+                              MathF.Max(Max.Y, y));
+        }
+
         public static Bounds Intersect(Bounds boundsA, Bounds boundsB)
         {
             return new Bounds(
