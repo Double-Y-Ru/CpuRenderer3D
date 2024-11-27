@@ -8,15 +8,15 @@ namespace CpuRenderer3D.Shaders
         public Buffer<Vector4> DiffuseTexture;
         public Buffer<float> SpecularTexture;
         public Vector4 AmbientColor;
-        public Vector3 LightDirection; // light direction in view coordinates
-        public Vector4 LightColor = new Vector4(1f, 1f, 1f, 1f);
+        public Vector3 LightDirection = Vector3.UnitZ; // light direction in view coordinates
+        public Vector4 LightColor;
 
-        public LitShaderProgram(Buffer<Vector4> diffuseTexture, Buffer<float> specularTexture, Vector4 ambientColor, Vector3 lightDirection)
+        public LitShaderProgram(Buffer<Vector4> diffuseTexture, Buffer<float> specularTexture, Vector4 ambientColor, Vector4 lightColor)
         {
             DiffuseTexture = diffuseTexture;
             SpecularTexture = specularTexture;
             AmbientColor = ambientColor;
-            LightDirection = lightDirection;
+            LightColor = lightColor;
         }
 
         public FragmentInput<LitFragmentData> ComputeVertex(VertexInput input, RenderingContext shaderContext)
