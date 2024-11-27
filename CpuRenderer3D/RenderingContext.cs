@@ -32,21 +32,21 @@ namespace CpuRenderer3D
 
             WorldClip = WorldView * ViewClip;
             ModelClip = ModelWorld * WorldClip;
-            ModelScreen = ClipScreen * ModelClip;
+            ModelScreen = ModelClip * ClipScreen;
         }
 
         public void SetWorldView(Matrix4x4 camera)
         {
             WorldView = camera;
             ModelClip = ModelWorld * WorldClip;
-            ModelScreen = ClipScreen * ModelClip;
+            ModelScreen = ModelClip * ClipScreen;
         }
 
         public void SetModelWorld(Matrix4x4 modelWorld)
         {
             ModelWorld = modelWorld;
             ModelClip = ModelWorld * WorldClip;
-            ModelScreen = ClipScreen * ModelClip;
+            ModelScreen = ModelClip * ClipScreen;
         }
     }
 }

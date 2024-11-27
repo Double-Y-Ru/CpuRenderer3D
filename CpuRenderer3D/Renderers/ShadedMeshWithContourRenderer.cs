@@ -12,8 +12,8 @@ namespace CpuRenderer3D.Renderers
         private readonly IInterpolator<FragmentInput<TFragmentData>> _interpolator;
         private readonly Vector4 _contourColor;
 
-        private readonly Dictionary<TriangleVertexKey, Vector4> _triangleVerticesCache;
-        private readonly Vector3[] _triangleNormalsCache;
+        private readonly Dictionary<TriangleVertexKey, Vector4> _triangleVerticesScreen;
+        private readonly bool[] _normalOrientationCache;
         private Buffer<bool>? _mask;
 
         public ShadedMeshWithContourRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<FragmentInput<TFragmentData>> interpolator, Vector4 contourColor)
@@ -22,14 +22,14 @@ namespace CpuRenderer3D.Renderers
             _shaderProgram = shaderProgram;
             _interpolator = interpolator;
             _contourColor = contourColor;
-            _triangleVerticesCache = new Dictionary<TriangleVertexKey, Vector4>(_mesh.GetVertices().Length * 3);
-            _triangleNormalsCache = new Vector3[_mesh.GetTriangles().Length];
+            _triangleVerticesScreen = new Dictionary<TriangleVertexKey, Vector4>(_mesh.GetVertices().Length * 3);
+            _normalOrientationCache = new bool[_mesh.GetTriangles().Length];
         }
 
         public void Render(RenderingContext renderingContext)
         {
-            Bounds screenBounds = new Bounds(Vector2.Zero, new Vector2(renderingContext.ColorBuffer.Width, renderingContext.ColorBuffer.Height));
-            Bounds objectBounds = new Bounds(new Vector2(renderingContext.ColorBuffer.Width, renderingContext.ColorBuffer.Height), Vector2.Zero);
+            Bounds3 screenBounds = new Bounds3(Vector3.Zero, new Vector3(renderingContext.ColorBuffer.Width, renderingContext.ColorBuffer.Height, 1f));
+            Bounds2 objectBounds = new Bounds2(new Vector2(renderingContext.ColorBuffer.Width, renderingContext.ColorBuffer.Height), Vector2.Zero);
 
             if (_mask == null
              || _mask.Width != renderingContext.ColorBuffer.Width
@@ -56,12 +56,12 @@ namespace CpuRenderer3D.Renderers
                 Vector4 point1Screen = Vector4.Transform(fragInput1.Position, renderingContext.ClipScreen);
                 Vector4 point2Screen = Vector4.Transform(fragInput2.Position, renderingContext.ClipScreen);
 
-                _triangleVerticesCache[new TriangleVertexKey(tid, triangle.Vertex0.VertexIndex)] = point0Screen;
-                _triangleVerticesCache[new TriangleVertexKey(tid, triangle.Vertex1.VertexIndex)] = point1Screen;
-                _triangleVerticesCache[new TriangleVertexKey(tid, triangle.Vertex2.VertexIndex)] = point2Screen;
+                _triangleVerticesScreen[new TriangleVertexKey(tid, triangle.Vertex0.VertexIndex)] = point0Screen;
+                _triangleVerticesScreen[new TriangleVertexKey(tid, triangle.Vertex1.VertexIndex)] = point1Screen;
+                _triangleVerticesScreen[new TriangleVertexKey(tid, triangle.Vertex2.VertexIndex)] = point2Screen;
 
-                _triangleNormalsCache[tid] = Vector3.Cross(fragInput0.Position.XYZ() - fragInput1.Position.XYZ(),
-                                      fragInput0.Position.XYZ() - fragInput2.Position.XYZ());
+                _normalOrientationCache[tid] = VectorExtenstions.Cross(fragInput0.Position.XY() - fragInput1.Position.XY(),
+                                                                       fragInput0.Position.XY() - fragInput2.Position.XY()) > 0f;
 
                 Rasterizer.DrawTriangle(point0Screen, fragInput0, point1Screen, fragInput1, point2Screen, fragInput2, _interpolator, screenBounds, TestDepthF, SetDepthF, SetColorAndMask);
             }
@@ -72,12 +72,10 @@ namespace CpuRenderer3D.Renderers
 
                 if (edge.Tris.Length == 1)
                 {
-                    bool triangle0IsCameraFaced = Vector3.Dot(_triangleNormalsCache[edge.Tris[0]], Vector3.UnitZ) > 0;
-
-                    if (triangle0IsCameraFaced)
+                    if (_normalOrientationCache[edge.Tris[0]])
                     {
-                        Vector4 point0Screen = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
-                        Vector4 point1Screen = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
+                        Vector4 point0Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
+                        Vector4 point1Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
 
                         Vector3 point0ScreenDivW = point0Screen.XYZDivW();
                         Vector3 point1ScreenDivW = point1Screen.XYZDivW();
@@ -87,31 +85,25 @@ namespace CpuRenderer3D.Renderers
                 }
                 else if (edge.Tris.Length == 2)
                 {
-                    bool triangle0IsCameraFaced = Vector3.Dot(_triangleNormalsCache[edge.Tris[0]], Vector3.UnitZ) > 0;
-                    bool triangle1IsCameraFaced = Vector3.Dot(_triangleNormalsCache[edge.Tris[1]], Vector3.UnitZ) > 0;
+                    bool triangle0IsCameraFaced = _normalOrientationCache[edge.Tris[0]];
+                    bool triangle1IsCameraFaced = _normalOrientationCache[edge.Tris[1]];
 
                     if (triangle0IsCameraFaced != triangle1IsCameraFaced)
                     {
-                        Vector4 tri0point0Screen = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
-                        Vector4 tri0point1Screen = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
+                        Vector4 tri0point0Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
+                        Vector4 tri0point1Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
 
-                        Vector4 tri1point0Screen = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[1], edge.Vertex0Index)];
-                        Vector4 tri1point1Screen = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[1], edge.Vertex1Index)];
+                        Vector4 tri1point0Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[1], edge.Vertex0Index)];
+                        Vector4 tri1point1Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[1], edge.Vertex1Index)];
 
-                        Vector3 tri0point0ScreenDivW = tri0point0Screen.XYZDivW();
-                        Vector3 tri0point1ScreenDivW = tri0point1Screen.XYZDivW();
-
-                        Vector3 tri1point0ScreenDivW = tri1point0Screen.XYZDivW();
-                        Vector3 tri1point1ScreenDivW = tri1point1Screen.XYZDivW();
-
-                        if (tri0point0ScreenDivW == tri1point0ScreenDivW && tri0point1ScreenDivW == tri1point1ScreenDivW)
+                        if (tri0point0Screen == tri1point0Screen && tri0point1Screen == tri1point1Screen)
                         {
-                            CheckAndDrawLine(tri0point0ScreenDivW, tri0point1ScreenDivW);
+                            Rasterizer.DrawLine(tri0point0Screen, tri0point1Screen, _contourColor, screenBounds, TestDepthAndMask, (x, y, d) => { }, SetColor);
                         }
                         else
                         {
-                            CheckAndDrawLine(tri0point0ScreenDivW, tri0point1ScreenDivW);
-                            CheckAndDrawLine(tri1point0ScreenDivW, tri1point1ScreenDivW);
+                            Rasterizer.DrawLine(tri0point0Screen, tri0point1Screen, _contourColor, screenBounds, TestDepthAndMask, (x, y, d) => { }, SetColor);
+                            Rasterizer.DrawLine(tri1point0Screen, tri1point1Screen, _contourColor, screenBounds, TestDepthAndMask, (x, y, d) => { }, SetColor);
                         }
                     }
                 }
@@ -119,13 +111,10 @@ namespace CpuRenderer3D.Renderers
                 {
                     foreach (int triangleId in edge.Tris)
                     {
-                        Vector4 point0Screen = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
-                        Vector4 point1Screen = _triangleVerticesCache[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
+                        Vector4 point0Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
+                        Vector4 point1Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
 
-                        Vector3 point0ScreenDivW = point0Screen.XYZDivW();
-                        Vector3 point1ScreenDivW = point1Screen.XYZDivW();
-
-                        CheckAndDrawLine(point0ScreenDivW, point1ScreenDivW);
+                        Rasterizer.DrawLine(point0Screen, point1Screen, _contourColor, screenBounds, TestDepthAndMask, (x, y, d) => { }, SetColor);
                     }
                 }
             }
@@ -155,8 +144,8 @@ namespace CpuRenderer3D.Renderers
 
             void CheckAndDrawLine(Vector3 triangleVertex0ClipDivW, Vector3 triangleVertex1ClipDivW)
             {
-                if (screenBounds.IsInside(triangleVertex0ClipDivW.XY())
-                 && screenBounds.IsInside(triangleVertex1ClipDivW.XY()))
+                if (screenBounds.Contains(triangleVertex0ClipDivW)
+                 && screenBounds.Contains(triangleVertex1ClipDivW))
                 {
                     Rasterizer.DrawLine(triangleVertex0ClipDivW, triangleVertex1ClipDivW, _contourColor, TestDepthAndMask, (x, y, d) => { }, SetColor);
                 }

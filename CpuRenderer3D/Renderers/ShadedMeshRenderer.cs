@@ -17,7 +17,7 @@ namespace CpuRenderer3D.Renderers
 
         public void Render(RenderingContext renderingContext)
         {
-            Bounds clipBounds = new Bounds(Vector2.Zero, new Vector2(renderingContext.ColorBuffer.Width, renderingContext.ColorBuffer.Height));
+            Bounds3 clipBounds = new Bounds3(Vector3.Zero, new Vector3(renderingContext.ColorBuffer.Width, renderingContext.ColorBuffer.Height, 1f));
 
             for (int i = 0; i < _mesh.GetTriangles().Length; i++)
             {

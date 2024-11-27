@@ -3,13 +3,13 @@ using System.Numerics;
 
 namespace CpuRenderer3D
 {
-    public record struct Bounds(Vector2 Min, Vector2 Max)
+    public record struct Bounds2(Vector2 Min, Vector2 Max)
     {
-        public static Bounds FromPoints(params Vector2[] points)
+        public static Bounds2 FromPoints(params Vector2[] points)
         {
-            if (points.Length == 0) return new Bounds();
+            if (points.Length == 0) return new Bounds2();
 
-            Bounds bounds = new Bounds(points[0], points[0]);
+            Bounds2 bounds = new Bounds2(points[0], points[0]);
 
             for (int i = 1; i < points.Length; i++)
             {
@@ -44,9 +44,9 @@ namespace CpuRenderer3D
                               MathF.Max(Max.Y, y));
         }
 
-        public static Bounds Intersect(Bounds boundsA, Bounds boundsB)
+        public static Bounds2 Intersect(Bounds2 boundsA, Bounds2 boundsB)
         {
-            return new Bounds(
+            return new Bounds2(
                 Min: new Vector2(MathF.Max(boundsA.Min.X, boundsB.Min.X),
                                  MathF.Max(boundsA.Min.Y, boundsB.Min.Y)),
                 Max: new Vector2(MathF.Min(boundsA.Max.X, boundsB.Max.X),
