@@ -41,7 +41,8 @@ namespace CpuRenderer3D.Demo
                 Transform barrelTransform = new Transform(new Vector3(2f, 0f, 0f), Quaternion.Identity);
                 scene.AddChild(new SceneNode(barrelTransform, [new ShadedMeshRenderer<LitFragmentData>(barrelMesh, litBarrelTextureShader, litBarrelTextureShader)]));
 
-                UnlitShaderProgram unlitColorShader = new UnlitShaderProgram(headDiffuseTexture);
+                Buffer<Vector4> chessTexture = CreateChessTexture(4, 4, Vector4.One, Vector4.Zero);
+                UnlitShaderProgram unlitColorShader = new UnlitShaderProgram(chessTexture);
                 Mesh quadMesh = ObjReader.ReadFromFile("Quad.obj", calculateNormals: true);
                 Transform quadTransform = new Transform(new Vector3(0f, -1.1f, 0f), EulerAngles.EulerToQuaternion(0.25f * MathF.PI, -0.5f * MathF.PI, 0f));
                 scene.AddChild(new SceneNode(quadTransform, [new ShadedMeshRenderer<UnlitFragmentData>(quadMesh, unlitColorShader, unlitColorShader)]));
@@ -74,6 +75,19 @@ namespace CpuRenderer3D.Demo
 
             RenderWindow renderWindow = new RenderWindow(GameWindowSettings.Default, settings, BufferWidth, BufferHeight, scene, camera, bgColor);
             renderWindow.Run();
+        }
+
+        private static Buffer<Vector4> CreateChessTexture(int width, int height, Vector4 positiveValue, Vector4 negativeValue)
+        {
+            Buffer<Vector4> chess = new Buffer<Vector4>(width, height, Vector4.One);
+
+            for (int y = 0; y < height; ++y)
+                for (int x = 0; x < width; ++x)
+                {
+                    chess.Set(x, y, (x + y) % 2 == 0 ? negativeValue : positiveValue);
+                }
+
+            return chess;
         }
     }
 }

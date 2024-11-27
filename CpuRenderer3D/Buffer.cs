@@ -75,10 +75,10 @@ namespace CpuRenderer3D
 
         public T Sample(Vector2 uv)
         {
-            uv = Vector2.Clamp(uv, Vector2.Zero, Vector2.One);
-
-            int x = (int)MathF.Round(uv.X * (Width - 1));
-            int y = Height - 1 - (int)MathF.Round(uv.Y * (Height - 1));
+            int x = (int)(uv.X * Width);
+            int y = Height - 1 - (int)(uv.Y * Height);
+            x = Math.Clamp(x, 0, Width - 1);
+            y = Math.Clamp(y, 0, Height - 1);
 
             return Get(x, y);
         }
