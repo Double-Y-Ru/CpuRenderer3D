@@ -27,7 +27,8 @@ namespace CpuRenderer3D.Demo
 
                 Buffer<Vector4> headDiffuseTexture = BufferReader.ReadRgbaFromFile("african_head_diffuse.png");
                 Buffer<float> headSpecularTexture = BufferReader.ReadGrayFromFile("african_head_spec.png");
-                LitShaderProgram litHeadTextureShader = new LitShaderProgram(headDiffuseTexture, headSpecularTexture, ambientColor, lightColor);
+                Buffer<float> toonMap = new Buffer<float>(10, 1, 1f); toonMap.SetData([0.0f, 0.5f, 0.5f, 0.5f, 1f, 1f, 1f, 1f, 1f]);
+                ToonShaderProgram litHeadTextureShader = new ToonShaderProgram(headDiffuseTexture, headSpecularTexture, toonMap, ambientColor, lightColor);
                 Mesh headMesh = ObjReader.ReadFromFile("african_head.obj", calculateNormals: false);
                 Transform headTransform = new Transform(Vector3.Zero, Quaternion.Identity);
                 //scene.AddChild(new SceneNode(headTransform, [new ShadedMeshRenderer<LitFragmentData>(headMesh, litHeadTextureShader, litHeadTextureShader)]));
