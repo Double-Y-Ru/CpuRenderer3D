@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>10</LangVersion>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>AndreyLemin</Authors>
+    <Company>Double-Y</Company>
+    <Title>CPU Renderer 3D</Title>
+    <RepositoryUrl>https://github.com/Double-Y-Ru/CpuRenderer3D</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>A lightweight library that allows to use 3d-scene rendering into your application. It requires no OpenLG or DirectX or Vulkan, and does not use GPU. You can embed it into any sort of application, including batch tools and server-side applications.</Description>
+  </PropertyGroup>
+
+</Project>
