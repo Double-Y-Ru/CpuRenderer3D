@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace DoubleY.CpuRenderer3D.Renderers
 {
-    public class ShadedMeshWithContourRenderer<TFragmentData> : IRenderer where TFragmentData : struct
+    public class ShadedMeshWithDepthBasedContourRenderer<TFragmentData> : IRenderer where TFragmentData : struct
     {
         private record struct TriangleVertexKey(int TriangleId, int VertexId);
 
@@ -15,8 +15,9 @@ namespace DoubleY.CpuRenderer3D.Renderers
         private readonly Dictionary<TriangleVertexKey, Vector4> _triangleVerticesScreen;
         private readonly bool[] _normalOrientationCache;
         private Buffer<bool>? _mask;
+        private float _depthThreshold;
 
-        public ShadedMeshWithContourRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<FragmentInput<TFragmentData>> interpolator, Vector4 contourColor)
+        public ShadedMeshWithDepthBasedContourRenderer(Mesh mesh, IShaderProgram<TFragmentData> shaderProgram, IInterpolator<FragmentInput<TFragmentData>> interpolator, Vector4 contourColor, float depthThreshold)
         {
             _mesh = mesh;
             _shaderProgram = shaderProgram;
@@ -24,6 +25,7 @@ namespace DoubleY.CpuRenderer3D.Renderers
             _contourColor = contourColor;
             _triangleVerticesScreen = new Dictionary<TriangleVertexKey, Vector4>(_mesh.GetVertices().Length * 3);
             _normalOrientationCache = new bool[_mesh.GetTriangles().Length];
+            _depthThreshold = depthThreshold;
         }
 
         public void Render(RenderingContext renderingContext)
@@ -66,59 +68,6 @@ namespace DoubleY.CpuRenderer3D.Renderers
                 Rasterizer.DrawTriangle(point0Screen, fragInput0, point1Screen, fragInput1, point2Screen, fragInput2, _interpolator, screenBounds, TestDepthF, SetDepthF, SetColorAndMask);
             }
 
-            for (int eid = 0; eid < _mesh.GetEdges().Length; eid++)
-            {
-                Edge edge = _mesh.GetEdges()[eid];
-
-                if (edge.Tris.Length == 1)
-                {
-                    if (_normalOrientationCache[edge.Tris[0]])
-                    {
-                        Vector4 point0Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
-                        Vector4 point1Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
-
-                        Vector3 point0ScreenDivW = point0Screen.XYZDivW();
-                        Vector3 point1ScreenDivW = point1Screen.XYZDivW();
-
-                        CheckAndDrawLine(point0ScreenDivW, point1ScreenDivW);
-                    }
-                }
-                else if (edge.Tris.Length == 2)
-                {
-                    bool triangle0IsCameraFaced = _normalOrientationCache[edge.Tris[0]];
-                    bool triangle1IsCameraFaced = _normalOrientationCache[edge.Tris[1]];
-
-                    if (triangle0IsCameraFaced != triangle1IsCameraFaced)
-                    {
-                        Vector4 tri0point0Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
-                        Vector4 tri0point1Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
-
-                        Vector4 tri1point0Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[1], edge.Vertex0Index)];
-                        Vector4 tri1point1Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[1], edge.Vertex1Index)];
-
-                        if (tri0point0Screen == tri1point0Screen && tri0point1Screen == tri1point1Screen)
-                        {
-                            Rasterizer.DrawLine(tri0point0Screen, tri0point1Screen, _contourColor, screenBounds, TestDepthAndMask, (x, y, d) => { }, SetColor);
-                        }
-                        else
-                        {
-                            Rasterizer.DrawLine(tri0point0Screen, tri0point1Screen, _contourColor, screenBounds, TestDepthAndMask, (x, y, d) => { }, SetColor);
-                            Rasterizer.DrawLine(tri1point0Screen, tri1point1Screen, _contourColor, screenBounds, TestDepthAndMask, (x, y, d) => { }, SetColor);
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (int triangleId in edge.Tris)
-                    {
-                        Vector4 point0Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex0Index)];
-                        Vector4 point1Screen = _triangleVerticesScreen[new TriangleVertexKey(edge.Tris[0], edge.Vertex1Index)];
-
-                        Rasterizer.DrawLine(point0Screen, point1Screen, _contourColor, screenBounds, TestDepthAndMask, (x, y, d) => { }, SetColor);
-                    }
-                }
-            }
-
             for (int y = (int)objectBounds.Min.Y - 1; y <= (int)objectBounds.Max.Y; ++y)
             {
                 for (int x = (int)objectBounds.Min.X - 1; x <= (int)objectBounds.Max.X; ++x)
@@ -138,6 +87,23 @@ namespace DoubleY.CpuRenderer3D.Renderers
                     {
                         if (rightExists && rightIsInside) SetColor(x + 1, y, _contourColor);
                         if (topExists && topIsInside) SetColor(x, y + 1, _contourColor);
+                    }
+
+                    // Check inner depth difference
+                    if (centerIsInside && rightExists && topExists)
+                    {
+                        float centerDepth = renderingContext.DepthBuffer.Get(x, y);
+                        float rightDepth = renderingContext.DepthBuffer.Get(x + 1, y);
+                        float topDepth = renderingContext.DepthBuffer.Get(x, y + 1);
+
+                        float horizontalDiff = (rightDepth - centerDepth) * centerDepth;
+                        float verticalDiff = (topDepth - centerDepth) * centerDepth;
+
+                        if (horizontalDiff > _depthThreshold) SetColor(x, y, _contourColor);
+                        else if (horizontalDiff < -_depthThreshold) SetColor(x + 1, y, _contourColor);
+
+                        if (verticalDiff > _depthThreshold) SetColor(x, y, _contourColor);
+                        else if (verticalDiff < -_depthThreshold) SetColor(x, y + 1, _contourColor);
                     }
                 }
             }

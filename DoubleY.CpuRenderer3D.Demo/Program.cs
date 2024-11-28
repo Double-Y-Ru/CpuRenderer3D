@@ -32,7 +32,7 @@ namespace DoubleY.CpuRenderer3D.Demo
                 Mesh headMesh = ObjReader.ReadFromFile("african_head.obj", calculateNormals: false);
                 Transform headTransform = new Transform(Vector3.Zero, Quaternion.Identity);
                 //scene.AddChild(new SceneNode(headTransform, [new ShadedMeshRenderer<LitFragmentData>(headMesh, litHeadTextureShader, litHeadTextureShader)]));
-                scene.AddChild(new SceneNode(headTransform, [new ShadedMeshWithContourRenderer<LitFragmentData>(headMesh, litHeadTextureShader, litHeadTextureShader, Vector4.One)]));
+                scene.AddChild(new SceneNode(headTransform, [new ShadedMeshWithDepthBasedContourRenderer<LitFragmentData>(headMesh, litHeadTextureShader, litHeadTextureShader, Vector4.One, 0.002f)]));
 
                 Buffer<Vector4> barrelDiffuseTexture = BufferReader.ReadRgbaFromFile("Barrel_diffuse.png");
                 Buffer<float> barrelSpecularTexture = BufferReader.ReadGrayFromFile("Barrel_spec.png");
