@@ -27,7 +27,7 @@ namespace DoubleY.CpuRenderer3D
         {
             // return new Camera(transform, Matrix4x4.CreatePerspectiveFieldOfView(fieldOfViewRadians, aspect, nearPlane, farPlane)); // The difference is M44 == 0f
 
-            float yScale = (1.0f / MathF.Tan(fieldOfViewRadians / 2.0f)) * aspect;
+            float yScale = 1.0f / MathF.Tan(fieldOfViewRadians / 2.0f) * aspect;
             float xScale = yScale / aspect;
             float frustumLength = farPlane - nearPlane;
 
@@ -35,7 +35,7 @@ namespace DoubleY.CpuRenderer3D
                 xScale, 0, 0, 0,
                 0, yScale, 0, 0,
                 0, 0, -((farPlane + nearPlane) / frustumLength), -1.0f,
-                0, 0, -((2.0f * nearPlane * farPlane) / frustumLength), 1f
+                0, 0, -(2.0f * nearPlane * farPlane / frustumLength), 1f
             );
 
             return new Camera(transform, m);

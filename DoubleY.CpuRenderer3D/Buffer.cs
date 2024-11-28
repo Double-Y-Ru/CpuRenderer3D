@@ -41,7 +41,7 @@ namespace DoubleY.CpuRenderer3D
         {
             if (-1 < x && x < Width && -1 < y && y < Height)
             {
-                int index = (y * Width + x);
+                int index = y * Width + x;
                 _data[index] = value;
             }
             else throw new IndexOutOfRangeException();
@@ -51,7 +51,7 @@ namespace DoubleY.CpuRenderer3D
         {
             if (-1 < x && x < Width && -1 < y && y < Height)
             {
-                int index = (y * Width + x);
+                int index = y * Width + x;
 
                 result = _data[index];
                 return true;
@@ -65,7 +65,7 @@ namespace DoubleY.CpuRenderer3D
         {
             if (-1 < x && x < Width && -1 < y && y < Height)
             {
-                int index = (y * Width + x);
+                int index = y * Width + x;
 
                 return _data[index];
             }

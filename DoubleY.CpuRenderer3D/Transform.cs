@@ -55,7 +55,7 @@ namespace DoubleY.CpuRenderer3D
 
         public override bool Equals(object? obj)
         {
-            return (obj is Transform other) && Equals(other);
+            return obj is Transform other && Equals(other);
         }
 
         public bool Equals(Transform other)
