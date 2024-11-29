@@ -43,16 +43,6 @@ namespace DoubleY.CpuRenderer3D
         public Vector3 ToLocal(Vector3 vector) => Vector3.Transform(vector, GetInvertedMatrix());
         public Vector4 ToLocal(Vector4 vector) => Vector4.Transform(vector, GetInvertedMatrix());
 
-        public static bool operator ==(Transform a, Transform b)
-        {
-            return a.Origin == b.Origin && a.Rotation == b.Rotation;
-        }
-
-        public static bool operator !=(Transform a, Transform b)
-        {
-            return !(a == b);
-        }
-
         public override bool Equals(object? obj)
         {
             return obj is Transform other && Equals(other);
@@ -67,5 +57,17 @@ namespace DoubleY.CpuRenderer3D
         {
             return HashCode.Combine(Origin, Rotation);
         }
+
+        public static bool operator ==(Transform a, Transform b)
+        {
+            return a.Origin == b.Origin && a.Rotation == b.Rotation;
+        }
+
+        public static bool operator !=(Transform a, Transform b)
+        {
+            return !(a == b);
+        }
+
+        public static Transform Identity => new Transform();
     }
 }
