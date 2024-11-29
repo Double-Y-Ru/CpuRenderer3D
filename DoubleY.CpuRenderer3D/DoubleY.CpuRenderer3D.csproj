@@ -10,7 +10,16 @@
     <Title>CPU Renderer 3D</Title>
     <RepositoryUrl>https://github.com/Double-Y-Ru/CpuRenderer3D</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Description>A lightweight library that allows to use 3d-scene rendering into your application. It requires no OpenLG or DirectX or Vulkan, and does not use GPU. You can embed it into any sort of application, including batch tools and server-side applications.</Description>
+    <Description>CPU Renderer 3d is a lightweight library that allows to use 3d-scene rendering into your application. It requires no OpenGL or DirectX or Vulkan, and does not use GPU. You can embed it into any sort of application, including batch tools and server-side applications.</Description>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageTags>3d;render;software rendering;cpu rendering;</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
